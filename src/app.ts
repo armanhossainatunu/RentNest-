@@ -6,6 +6,8 @@ import bcrypt from "bcrypt";
 import { config } from "./config";
 import httpStatus from "http-status";
 import { userRouter } from "./modules/user/user.route";
+import { authService } from "./modules/auth/auth.service";
+import { authRoute } from "./modules/auth/auth.route";
 
 const app: Application = express();
 
@@ -25,5 +27,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", userRouter);
+app.use("/api/auth/", authRoute)
 
 export default app;
