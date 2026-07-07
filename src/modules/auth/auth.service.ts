@@ -24,10 +24,17 @@ const accessToken = jwt.sign({
   expiresIn: "1d",
 });
 // refresh token
-// const refreshToken = jwt.sign({}, config.jwt_refresh_secret, {
-//   expiresIn: config.jwt_refresh_expires_in,
-// });
-  return user
+const refreshToken = jwt.sign({
+  userId: user.id,
+  email: user.email,
+  role: user.role
+},"refresh_token", {
+  expiresIn: "7d"
+});
+  return {
+    accessToken,
+    refreshToken,
+  };
 };
 
 export const authService = {
