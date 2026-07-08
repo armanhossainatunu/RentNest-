@@ -16,10 +16,11 @@ const loginUser = async (payload: LoginPayload) => {
     throw new Error("password is Incorrect");
   }
   const jwtPaylode = {
+    name: user.name,
     userId: user.id,
     email: user.email,
     role: user.role,
-  };
+  }; 
   //access token
   const accessToken = jwtUtils.createToken(jwtPaylode, config.jwt_secret_key, {
     expiresIn: config.jwt_expires_in,
