@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import { config } from "../../config";
 import { registerUserPayload } from "./user.interface";
 
-
 const registerUserIntoDB = async (payload: registerUserPayload) => {
   const { name, email, password, profilePhoto, role } = payload;
   const isUserExists = await prisma.user.findUnique({
@@ -29,12 +28,12 @@ const registerUserIntoDB = async (payload: registerUserPayload) => {
       },
     },
   });
-//   await prisma.profile.create({
-//     data: {
-//       userId: createdUser.id,
-//       profilePhoto,
-//     },
-//   });
+  //   await prisma.profile.create({
+  //     data: {
+  //       userId: createdUser.id,
+  //       profilePhoto,
+  //     },
+  //   });
   const user = await prisma.user.findUnique({
     where: {
       id: createdUser.id,
@@ -50,7 +49,20 @@ const registerUserIntoDB = async (payload: registerUserPayload) => {
   return user;
 };
 
+const getProfileBD = async (useId: string) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {id: useId},
+    omit: {
+      password: true,
+    },
+    include: {
+      profile: true,
+    },
+  });
+  return user;
+};
 
 export const userService = {
   registerUserIntoDB,
+  getProfileBD,
 };
