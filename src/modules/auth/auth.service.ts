@@ -10,7 +10,9 @@ const loginUser = async (payload: LoginPayload) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: { email },
   });
-
+  if (user.status === "INACTIVE") {
+    throw new Error("User is inactive");
+  }
   const isPasswordMatched = await bcrypt.compare(password, user.password);
   if (!isPasswordMatched) {
     throw new Error("password is Incorrect");
@@ -20,7 +22,7 @@ const loginUser = async (payload: LoginPayload) => {
     userId: user.id,
     email: user.email,
     role: user.role,
-  }; 
+  };
   //access token
   const accessToken = jwtUtils.createToken(jwtPaylode, config.jwt_secret_key, {
     expiresIn: config.jwt_expires_in,
@@ -40,7 +42,8 @@ const loginUser = async (payload: LoginPayload) => {
     refreshToken,
   };
 };
-
+const refreshToken = async (token: string) => {};
 export const authService = {
   loginUser,
+  refreshToken,
 };

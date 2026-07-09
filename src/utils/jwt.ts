@@ -21,7 +21,7 @@ const verifyToken = (token: string, secret: string) => {
     console.log("Token verifiy faild:", error);
    return {
      success: false,
-     error: error.messagej
+     error: error.message
    }
   }
 };
