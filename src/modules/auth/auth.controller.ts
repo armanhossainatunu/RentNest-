@@ -35,10 +35,8 @@ const loginUser = catchAsync(
     });
   },
 );
-const refeshToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
-});
 export const authController = {
   loginUser,
-  refeshToken
+ 
 };
