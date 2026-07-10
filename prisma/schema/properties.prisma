@@ -1,19 +1,20 @@
 model Property {
-    id          String   @id @default(uuid())
-    title       String
-    thumbnail   String?
-    description String?
-    price       Float?
-    address     String?
-    city        String?
-    state       String?
-    zipCode     String?
-    bedrooms    Int?
-    bathrooms   Int?
-    ownerId     String
-    owner       User     @relation(fields: [ownerId], references: [id])
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String         @id @default(uuid())
+  title       String
+  thumbnail   String?
+  description String
+  price       Float
+  status      PropertyStatus
+  authorId    String
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  location    String
+  bedrooms    Int?
+  bathrooms   Int?
+  views       Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  reviews     Review[]
 
-    @@map("properties")
+  @@index([authorId])
+  @@map("properties")
 }
