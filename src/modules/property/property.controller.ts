@@ -33,17 +33,7 @@ const getAllProperties = catchAsync(async (req, res) => {
     data: result,
   });
 });
-// const getAllProperties = catchAsync(
-//   async (req: Request, res: Response, next: NextFunction) => {
-//     const properties = await propertyService.getAllProperties();
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: httpStatus.OK,
-//       message: "Properties fetched successfully",
-//       data: { properties },
-//     });
-//   },
-// );
+
 const getPropertyById = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const propertyId = req.params.id;
