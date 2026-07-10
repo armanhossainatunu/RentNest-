@@ -1,13 +1,10 @@
 import cookieParser from "cookie-parser";
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
-import { prisma } from "./lib/prisma";
-import bcrypt from "bcrypt";
-import { config } from "./config";
-import httpStatus from "http-status";
 import { userRouter } from "./modules/user/user.route";
-import { authService } from "./modules/auth/auth.service";
 import { authRoute } from "./modules/auth/auth.route";
+import { propertyRouter } from "./modules/property/property.route";
+import { reviewRouter } from "./modules/review/review.route";
 
 const app: Application = express();
 
@@ -27,6 +24,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", userRouter);
-app.use("/api/auth/", authRoute)
+app.use("/api/auth/", authRoute);
+app.use("/api/landlord", propertyRouter);
+app.use("/api/", propertyRouter);
+app.use("/api/", reviewRouter);
 
 export default app;

@@ -18,7 +18,7 @@ declare global {
   }
 }
 
-router.post("/register", userController.registerUser);
+router.post("/register", userController.register);
 router.get(
   "/me",
   auth(Role.ADMIN, Role.LANDLORD, Role.TENANT),

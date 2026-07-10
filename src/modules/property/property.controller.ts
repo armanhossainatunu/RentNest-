@@ -1,0 +1,93 @@
+import { NextFunction, Request, Response } from "express";
+import { catchAsync } from "../../utils/catchAsync";
+import { propertyService } from "./property.service";
+import { sendResponse } from "../../utils/sendResponse";
+import httpStatus from "http-status";
+
+const createProperty = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.user?.userId;
+
+    const payload = req.body;
+
+    const property = await propertyService.createProperty(
+      payload,
+      id as string,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Property created successfully",
+      data: { property },
+    });
+  },
+);
+const getAllProperties = catchAsync(async (req, res) => {
+  const result = await propertyService.getAllProperties(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Properties retrieved successfully",
+    data: result,
+  });
+});
+// const getAllProperties = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const properties = await propertyService.getAllProperties();
+//     sendResponse(res, {
+//       success: true,
+//       statusCode: httpStatus.OK,
+//       message: "Properties fetched successfully",
+//       data: { properties },
+//     });
+//   },
+// );
+const getPropertyById = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const propertyId = req.params.id;
+    if (!propertyId) {
+      throw new Error("Property id is required");
+    }
+
+    const property = await propertyService.getPropertyById(
+      propertyId as string,
+    );
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Property fetched successfully",
+      data: { property },
+    });
+  },
+);
+const getMyProperties = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const properties = await propertyService.getMyProperties(
+      req.user?.userId as string,
+
+    );
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Properties fetched successfully",
+      data: { properties },
+    });
+  },
+);
+const updateProperty = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {},
+);
+const deleteProperty = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {},
+);
+
+export const propertyController = {
+  createProperty,
+  getAllProperties,
+  getMyProperties,
+  getSingleProperty: getPropertyById,
+  updateProperty,
+  deleteProperty,
+};

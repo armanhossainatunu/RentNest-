@@ -13,3 +13,13 @@ enum PropertyStatus {
   AVAILABLE
   UNAVAILABLE
 }
+enum PropertyCategory {
+  APARTMENT
+  HOUSE
+  VILLA
+  DUPLEX
+  STUDIO
+  OFFICE
+  COMMERCIAL
+  SHOP
+}

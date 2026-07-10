@@ -3,13 +3,12 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import { userService } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { config } from "../../config";
-import { jwtUtils } from "../../utils/jwt";
 
-const registerUser = catchAsync(
+
+const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-    const user = await userService.registerUserIntoDB(payload);
+    const user = await userService.registerIntoDB(payload);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
@@ -21,9 +20,8 @@ const registerUser = catchAsync(
 
 const getProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-  
     const profile = await userService.getProfileBD(req.user?.userId as string);
-    console.log(profile)
+    console.log(profile);
 
     sendResponse(res, {
       success: true,
@@ -37,6 +35,6 @@ const getProfile = catchAsync(
 );
 
 export const userController = {
-  registerUser,
+  register,
   getProfile,
 };
