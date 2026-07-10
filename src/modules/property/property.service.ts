@@ -1,6 +1,6 @@
 import { Prisma } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
-import { propertyPayload } from "./property.interface";
+import { propertyPayload, propertyUpdatePayload } from "./property.interface";
 
 const createProperty = async (payload: propertyPayload, userId: string) => {
   const result = await prisma.property.create({
@@ -47,6 +47,7 @@ const getAllProperties = async (query: Record<string, any>) => {
           id: true,
           name: true,
           email: true,
+          role: true,
         },
       },
       reviews: true,
@@ -71,6 +72,7 @@ const getPropertyById = async (propertyId: string) => {
           id: true,
           name: true,
           email: true,
+          role: true,
         },
       },
       reviews: true,
@@ -104,10 +106,53 @@ const getAdminProperties = async () => {
 
   return result;
 };
-const updateProperty =async ( propertyId: string) => {
-
+const updateProperty = async (
+  propertyId: string,
+  payload: propertyUpdatePayload,
+  authorId: string,
+) => {
+  const property = await prisma.property.findUniqueOrThrow({
+    where: {
+      id: propertyId,
+    },
+  });
+  if (property.authorId !== authorId) {
+    throw new Error("You are not authorized to update this property");
+  }
+  return await prisma.property.update({
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      reviews: true,
+    },
+    where: {
+      id: propertyId,
+    },
+    data: {
+      ...payload,
+    },
+  });
 };
-const deleteProperty = () => {};
+const deleteProperty = async (propertyId: string, authorId: string) => {
+  const property = await prisma.property.findUniqueOrThrow({
+    where: {
+      id: propertyId,
+    },
+  });
+  if (property.authorId !== authorId) {
+    throw new Error("You are not authorized to delete this property");
+  }
+  return await prisma.property.delete({
+    where: {
+      id: propertyId,
+    },
+  });
+};
 
 export const propertyService = {
   createProperty,

@@ -64,7 +64,7 @@ const getPropertyById = catchAsync(
 );
 const getAdminProperties = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-  const properties = await propertyService.getAdminProperties();
+    const properties = await propertyService.getAdminProperties();
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -74,10 +74,44 @@ const getAdminProperties = catchAsync(
   },
 );
 const updateProperty = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+    const propertyId = req.params.id;
+
+    if (!propertyId) {
+      throw new Error("Property id is required");
+    }
+
+    const payload = req.body;
+    const property = await propertyService.updateProperty(
+      propertyId as string,
+      payload,
+      req.user?.userId as string,
+    );
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Property updated successfully",
+      data: { property },
+    });
+  },
 );
 const deleteProperty = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+    const propertyId = req.params?.id;
+    if (!propertyId) {
+      throw new Error("Property id is required");
+    }
+    await propertyService.deleteProperty(
+      propertyId as string,
+      req.user?.userId as string,
+    );
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Property deleted successfully",
+      data: null,
+    });
+  },
 );
 
 export const propertyController = {
