@@ -14,8 +14,8 @@ router.get(
   propertyController.getAllProperties
 );
 router.get(
- "/admin/properties",
-  propertyController.getSingleProperty
+ "/admin/properties", auth(Role.ADMIN),
+  propertyController.getAdminProperties
 )
 router.get(
   "/properties/:id",
@@ -33,3 +33,4 @@ router.delete(
   propertyController.deleteProperty
 );
 export const propertyRouter = router;
+ 

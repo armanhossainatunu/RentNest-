@@ -49,6 +49,7 @@ const getAllProperties = async (query: Record<string, any>) => {
           email: true,
         },
       },
+      reviews: true,
     },
     orderBy: {
       createdAt: "desc",
@@ -64,6 +65,16 @@ const getPropertyById = async (propertyId: string) => {
     },
   });
   const viewsUpdated = await prisma.property.update({
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      reviews: true,
+    },
     where: {
       id: propertyId,
     },
@@ -74,24 +85,34 @@ const getPropertyById = async (propertyId: string) => {
 
   return viewsUpdated;
 };
-const getMyProperties = async (authorId: string) => {
+const getAdminProperties = async () => {
   const result = await prisma.property.findMany({
-    where: {
-      authorId,
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      reviews: true,
     },
     orderBy: {
       createdAt: "desc",
     },
   });
+
   return result;
 };
-const updateProperty = () => {};
+const updateProperty =async ( propertyId: string) => {
+
+};
 const deleteProperty = () => {};
 
 export const propertyService = {
   createProperty,
   getAllProperties,
-  getMyProperties,
+  getAdminProperties,
   getPropertyById,
   updateProperty,
   deleteProperty,

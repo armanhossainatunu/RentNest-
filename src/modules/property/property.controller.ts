@@ -62,12 +62,9 @@ const getPropertyById = catchAsync(
     });
   },
 );
-const getMyProperties = catchAsync(
+const getAdminProperties = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const properties = await propertyService.getMyProperties(
-      req.user?.userId as string,
-
-    );
+  const properties = await propertyService.getAdminProperties();
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -86,7 +83,7 @@ const deleteProperty = catchAsync(
 export const propertyController = {
   createProperty,
   getAllProperties,
-  getMyProperties,
+  getAdminProperties,
   getSingleProperty: getPropertyById,
   updateProperty,
   deleteProperty,
