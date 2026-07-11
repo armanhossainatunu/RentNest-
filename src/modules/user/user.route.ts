@@ -25,4 +25,9 @@ router.get(
   auth(Role.ADMIN, Role.LANDLORD, Role.TENANT),
   userController.getProfile,
 );
+router.put(
+  "/users/:id",
+  auth(Role.ADMIN),
+  userController.updateUserStatus,
+)
 export const userRouter = router;

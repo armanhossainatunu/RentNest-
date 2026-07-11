@@ -25,10 +25,14 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", userRouter);
+app.use("/api/admin", userRouter, rentalRouter);
+app.use("/api/admin", rentalRouter);
 app.use("/api/admin", userRouter);
+
 app.use("/api/auth/", authRoute);
 app.use("/api/landlord", propertyRouter);
 app.use("/api/", propertyRouter, rentalRouter);
+app.use("/api/", rentalRouter);
 app.use("/api/", reviewRouter);
 
 export default app;

@@ -6,7 +6,7 @@ enum Role {
 
 enum Status {
   ACTIVE
-  INACTIVE
+  BANNED
 }
 enum RentalRequestStatus {
   PENDING

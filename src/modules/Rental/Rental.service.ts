@@ -118,8 +118,31 @@ const getRentalRequestDetails = async (
 
   throw new Error("You are not authorized to view this rental request");
 };
+
+const getAllRentalRequests = async () => {
+  return prisma.rentalRequest.findMany({
+    include: {
+      property: {
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 export const rentalService = {
   createRentalRequest,
   getRentalRequestDetails,
   getMyRentalRequests,
+  getAllRentalRequests,
 };

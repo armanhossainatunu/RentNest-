@@ -61,10 +61,22 @@ const getRentalRequestDetails = catchAsync(
     });
   },
 );
+const getAllRentalRequests = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await rentalService.getAllRentalRequests();
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "All rental requests retrieved successfully",
+      data: result,
+    });
+  },
+);
 
 export const rentalController = {
   createRentalRequest,
   getMyRentalRequests,
-  getRentalRequestDetails
+  getRentalRequestDetails,
+  getAllRentalRequests
 
 };

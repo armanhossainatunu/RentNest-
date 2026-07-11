@@ -2,10 +2,10 @@ import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
 import { config } from "../../config";
 import { registerPayload } from "./user.interface";
-import { Role } from "../../../generated/prisma/enums";
+import { Role, Status } from "../../../generated/prisma/enums";
+import { $Enums } from "../../../generated/prisma/browser";
 
 const registerIntoDB = async (payload: registerPayload) => {
-
   const { name, email, password, profilePhoto } = payload;
   const role = payload.role?.toUpperCase() as Role;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,12 +55,12 @@ const getAllUsers = async () => {
     include: {
       profile: true,
     },
-     omit: {
-        password: true,
-      }
+    omit: {
+      password: true,
+    },
   });
   return users;
-}
+};
 const getProfileBD = async (useId: string) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: useId },
@@ -73,9 +73,23 @@ const getProfileBD = async (useId: string) => {
   });
   return user;
 };
+const updateUserStatus = async (userId: string, status: $Enums.Status) => {
+  const formattedStatus = status.toUpperCase() as Status;
+  const user = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      status: formattedStatus,
+    },
+  });
+
+  return user;
+};
 
 export const userService = {
   registerIntoDB,
   getAllUsers,
   getProfileBD,
+  updateUserStatus,
 };
