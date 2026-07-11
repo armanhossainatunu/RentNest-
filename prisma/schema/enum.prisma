@@ -8,7 +8,11 @@ enum Status {
   ACTIVE
   INACTIVE
 }
-
+enum RentalRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
 enum PropertyStatus {
   AVAILABLE
   UNAVAILABLE

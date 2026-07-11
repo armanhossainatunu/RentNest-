@@ -62,36 +62,83 @@ const getAllProperties = async (query: Record<string, any>) => {
   return result;
 };
 const getPropertyById = async (propertyId: string) => {
-  const property = await prisma.property.findUnique({
-    where: {
-      id: propertyId,
-    },
-  });
-  if(!property) {
-    throw new Error("Property not found");
-  }
-  const viewsUpdated = await prisma.property.update({
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
+  // const property = await prisma.property.findUnique({
+  //   where: {
+  //     id: propertyId,
+  //   },
+  // });
+  // if(!property) {
+  //   throw new Error("Property id not found");
+  // }
+  // const viewsUpdated = await prisma.property.update({
+  //   include: {
+  //     author: {
+  //       select: {
+  //         id: true,
+  //         name: true,
+  //         email: true,
+  //         role: true,
+  //       },
+  //     },
+  //     reviews: true,
+  //   },
+  //   where: {
+  //     id: propertyId,
+  //   },
+  //   data: {
+  //     views: property.views + 1,
+  //   },
+  // });
+
+  // return viewsUpdated;
+
+const transactionResult = await prisma.$transaction(
+  async(tx) =>{
+    await tx.property.update({
+      where: {
+        id: propertyId,
+      },
+      data: {
+        views: {
+          increment: 1,
         },
       },
-      reviews: true,
-    },
-    where: {
-      id: propertyId,
-    },
-    data: {
-      views: property.views + 1,
-    },
-  });
+    });
+    return await tx.property.findUnique({
+      where: {
+        id: propertyId,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        reviews: true,
+      },
+    })
+  }
+);
 
-  return viewsUpdated;
+return transactionResult;
 };
+// const getAllPropertyCategories = async () => {
+//   const result = await prisma.property.findMany({
+//     // select: {
+//     //   category: true,
+//     // },
+//     // // distinct: ["category"],
+//     
+//   });
+//   return result;
+// }
+const getAllPropertyCategories = async () => {
+  return Object.values(PropertyCategory);
+};
+
 const getAdminProperties = async () => {
   const result = await prisma.property.findMany({
     include: {
@@ -184,6 +231,7 @@ if (!property) {
 export const propertyService = {
   createProperty,
   getAllProperties,
+  getAllPropertyCategories,
   getAdminProperties,
   getPropertyById,
   updateProperty,

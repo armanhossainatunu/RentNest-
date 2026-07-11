@@ -5,6 +5,7 @@ import { userRouter } from "./modules/user/user.route";
 import { authRoute } from "./modules/auth/auth.route";
 import { propertyRouter } from "./modules/property/property.route";
 import { reviewRouter } from "./modules/review/review.route";
+import { rentalRouter } from "./modules/Rental/Rental.route";
 
 const app: Application = express();
 
@@ -27,7 +28,7 @@ app.use("/api/auth", userRouter);
 app.use("/api/admin", userRouter);
 app.use("/api/auth/", authRoute);
 app.use("/api/landlord", propertyRouter);
-app.use("/api/", propertyRouter);
+app.use("/api/", propertyRouter, rentalRouter);
 app.use("/api/", reviewRouter);
 
 export default app;

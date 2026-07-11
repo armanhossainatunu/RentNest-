@@ -7,30 +7,29 @@ const router = Router();
 router.post(
   "/properties",
   auth(Role.LANDLORD),
-  propertyController.createProperty
+  propertyController.createProperty,
 );
+router.get("/properties", propertyController.getAllProperties);
 router.get(
-  "/properties",
-  propertyController.getAllProperties
+  "/categories",
+  propertyController.getAllPropertyCategories,
 );
+
 router.get(
- "/admin/properties", auth(Role.ADMIN),
-  propertyController.getAdminProperties
-)
-router.get(
-  "/properties/:id",
-  propertyController.getSingleProperty
+  "/admin/properties",
+  auth(Role.ADMIN),
+  propertyController.getAdminProperties,
 );
+router.get("/properties/:id", propertyController.getSingleProperty);
 
 router.put(
   "/properties/:id",
   auth(Role.LANDLORD),
-  propertyController.updateProperty
+  propertyController.updateProperty,
 );
 router.delete(
   "/properties/:id",
   auth(Role.LANDLORD, Role.ADMIN),
-  propertyController.deleteProperty
+  propertyController.deleteProperty,
 );
 export const propertyRouter = router;
- 

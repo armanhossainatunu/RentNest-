@@ -34,7 +34,16 @@ const getAllProperties = catchAsync(async (req, res) => {
     data: result,
   });
 });
-
+const getAllPropertyCategories = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
+  const result = await propertyService.getAllPropertyCategories();
+ 
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Property categories retrieved successfully",
+    data: result,
+  });
+})
 const getPropertyById = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const propertyId = req.params.id;
@@ -107,6 +116,7 @@ const deleteProperty = catchAsync(
 export const propertyController = {
   createProperty,
   getAllProperties,
+  getAllPropertyCategories,
   getAdminProperties,
   getSingleProperty: getPropertyById,
   updateProperty,
