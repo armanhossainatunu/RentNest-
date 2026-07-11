@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { propertyService } from "./property.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { Role } from "../../../generated/prisma/enums";
 
 const createProperty = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -25,7 +26,7 @@ const createProperty = catchAsync(
 );
 const getAllProperties = catchAsync(async (req, res) => {
   const result = await propertyService.getAllProperties(req.query);
-
+ 
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -37,13 +38,11 @@ const getAllProperties = catchAsync(async (req, res) => {
 const getPropertyById = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const propertyId = req.params.id;
-    if (!propertyId) {
-      throw new Error("Property id is required");
-    }
-
+ 
     const property = await propertyService.getPropertyById(
       propertyId as string,
     );
+    
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -94,6 +93,7 @@ const deleteProperty = catchAsync(
     await propertyService.deleteProperty(
       propertyId as string,
       req.user?.userId as string,
+      req.user?.role as Role,
     );
     sendResponse(res, {
       success: true,

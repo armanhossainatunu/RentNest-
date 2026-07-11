@@ -1,4 +1,4 @@
-import { Prisma } from "../../../generated/prisma/client";
+import { Prisma, PropertyCategory, PropertyStatus, Role } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { propertyPayload, propertyUpdatePayload } from "./property.interface";
 
@@ -56,15 +56,20 @@ const getAllProperties = async (query: Record<string, any>) => {
       createdAt: "desc",
     },
   });
-
+  if (result.length === 0) {
+    throw new Error("No data available");
+  }
   return result;
 };
 const getPropertyById = async (propertyId: string) => {
-  const property = await prisma.property.findUniqueOrThrow({
+  const property = await prisma.property.findUnique({
     where: {
       id: propertyId,
     },
   });
+  if(!property) {
+    throw new Error("Property not found");
+  }
   const viewsUpdated = await prisma.property.update({
     include: {
       author: {
@@ -111,14 +116,30 @@ const updateProperty = async (
   payload: propertyUpdatePayload,
   authorId: string,
 ) => {
-  const property = await prisma.property.findUniqueOrThrow({
+  const property = await prisma.property.findUnique({
     where: {
       id: propertyId,
     },
   });
+  if(!property) {
+    throw new Error("Property not found");
+  }
+
   if (property.authorId !== authorId) {
     throw new Error("You are not authorized to update this property");
   }
+
+ const updateData = {
+    ...payload,
+    ...(payload.category && {
+      category: payload.category.toUpperCase() as PropertyCategory,
+    }),
+    ...(payload.status && {
+      status: payload.status.toUpperCase() as PropertyStatus,
+    }),
+  };
+
+
   return await prisma.property.update({
     include: {
       author: {
@@ -133,18 +154,24 @@ const updateProperty = async (
     where: {
       id: propertyId,
     },
-    data: {
-      ...payload,
-    },
+    data: updateData
   });
 };
-const deleteProperty = async (propertyId: string, authorId: string) => {
-  const property = await prisma.property.findUniqueOrThrow({
+const deleteProperty = async (propertyId: string, authorId: string, userRole: Role) => {
+  // const property = await prisma.property.findUniqueOrThrow({
+  //   where: {
+  //     id: propertyId,
+  //   },
+  // });
+  const property = await prisma.property.findUnique({
     where: {
       id: propertyId,
     },
   });
-  if (property.authorId !== authorId) {
+if (!property) {
+    throw new Error("Property not found");
+  }
+  if (userRole !== Role.ADMIN && property.authorId !== authorId) {
     throw new Error("You are not authorized to delete this property");
   }
   return await prisma.property.delete({

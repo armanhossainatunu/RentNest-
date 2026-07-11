@@ -29,7 +29,7 @@ router.put(
 );
 router.delete(
   "/properties/:id",
-  auth(Role.LANDLORD),
+  auth(Role.LANDLORD, Role.ADMIN),
   propertyController.deleteProperty
 );
 export const propertyRouter = router;

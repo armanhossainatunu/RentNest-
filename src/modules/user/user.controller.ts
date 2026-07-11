@@ -17,7 +17,15 @@ const register = catchAsync(
     });
   },
 );
-
+const getAllUsers = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
+  const users = await userService.getAllUsers();
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Users fetched successfully",
+    data: { users },
+  });
+})
 const getProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const profile = await userService.getProfileBD(req.user?.userId as string);
@@ -36,5 +44,6 @@ const getProfile = catchAsync(
 
 export const userController = {
   register,
+  getAllUsers,
   getProfile,
 };

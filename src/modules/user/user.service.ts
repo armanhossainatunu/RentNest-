@@ -2,9 +2,16 @@ import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
 import { config } from "../../config";
 import { registerPayload } from "./user.interface";
+import { Role } from "../../../generated/prisma/enums";
 
 const registerIntoDB = async (payload: registerPayload) => {
-  const { name, email, password, profilePhoto, role } = payload;
+
+  const { name, email, password, profilePhoto } = payload;
+  const role = payload.role?.toUpperCase() as Role;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Error("Invalid email format");
+  }
   const isUserExists = await prisma.user.findUnique({
     where: { email },
   });
@@ -43,7 +50,17 @@ const registerIntoDB = async (payload: registerPayload) => {
   });
   return user;
 };
-
+const getAllUsers = async () => {
+  const users = await prisma.user.findMany({
+    include: {
+      profile: true,
+    },
+     omit: {
+        password: true,
+      }
+  });
+  return users;
+}
 const getProfileBD = async (useId: string) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: useId },
@@ -59,5 +76,6 @@ const getProfileBD = async (useId: string) => {
 
 export const userService = {
   registerIntoDB,
+  getAllUsers,
   getProfileBD,
 };
