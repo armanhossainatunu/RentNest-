@@ -5,7 +5,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { Role } from "../../../generated/prisma/enums";
 import { rentalService } from "../Rental/Rental.service";
-
+// create property
 const createProperty = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.user?.userId;
@@ -25,6 +25,7 @@ const createProperty = catchAsync(
     });
   },
 );
+// get all properties
 const getAllProperties = catchAsync(async (req, res) => {
   const result = await propertyService.getAllProperties(req.query);
  
@@ -35,8 +36,10 @@ const getAllProperties = catchAsync(async (req, res) => {
     data: result,
   });
 });
+// get all property categories
 const getAllPropertyCategories = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
   const result = await propertyService.getAllPropertyCategories();
+
  
   sendResponse(res, {
     success: true,
@@ -45,6 +48,7 @@ const getAllPropertyCategories = catchAsync(async (req : Request, res : Response
     data: result,
   });
 })
+// get property by id
 const getPropertyById = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const propertyId = req.params.id;
@@ -61,6 +65,7 @@ const getPropertyById = catchAsync(
     });
   },
 );
+// get admin properties
 const getAdminProperties = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const properties = await propertyService.getAdminProperties();
@@ -72,6 +77,7 @@ const getAdminProperties = catchAsync(
     });
   },
 );
+// update property
 const updateProperty = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const propertyId = req.params.id;
@@ -94,12 +100,11 @@ const updateProperty = catchAsync(
     });
   },
 );
-
+// update rental request
 const updateRentalRequestStatus = catchAsync(async (req, res) => {
   const rentalRequestId = req.params.id;
   const landlordId = req.user?.userId;
 
-  console.log("Body:", req.body);
 
   const status = req.body?.status?.toUpperCase();
 
@@ -120,6 +125,7 @@ const updateRentalRequestStatus = catchAsync(async (req, res) => {
     data: result,
   });
 });
+// delete property
 const deleteProperty = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const propertyId = req.params?.id;

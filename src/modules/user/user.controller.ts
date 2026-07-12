@@ -29,8 +29,7 @@ const getAllUsers = catchAsync(async (req : Request, res : Response, next : Next
 const getProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const profile = await userService.getProfileBD(req.user?.userId as string);
-    console.log(profile);
-
+  
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -55,9 +54,22 @@ const updateUserStatus = catchAsync(
     });
   },
 )
+const userDelete = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+    const user = await userService.userDelete(userId as string);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User deleted successfully",
+      data: { user },
+    });
+  },
+)
 export const userController = {
   register,
   getAllUsers,
   getProfile,
-  updateUserStatus
+  updateUserStatus,
+  userDelete
 };

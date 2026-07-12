@@ -6,8 +6,10 @@ import {
   Role,
 } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
+import httpStatus from "http-status";
 import { propertyPayload, propertyUpdatePayload } from "./property.interface";
 
+// create property
 const createProperty = async (payload: propertyPayload, userId: string) => {
   const result = await prisma.property.create({
     data: {
@@ -17,7 +19,7 @@ const createProperty = async (payload: propertyPayload, userId: string) => {
   });
   return result;
 };
-
+// get all properties
 const getAllProperties = async (query: Record<string, any>) => {
   const { location, category, minPrice, maxPrice } = query;
   const where: Prisma.PropertyWhereInput = {};
@@ -67,8 +69,21 @@ const getAllProperties = async (query: Record<string, any>) => {
   }
   return result;
 };
+// get property by id
 const getPropertyById = async (propertyId: string) => {
   const transactionResult = await prisma.$transaction(async (tx) => {
+    // Check property exists
+    const property = await tx.property.findUnique({
+      where: {
+        id: propertyId,
+      },
+    });
+
+    if (!property) {
+      throw new Error("Property not found");
+    }
+
+    // Increment views
     await tx.property.update({
       where: {
         id: propertyId,
@@ -79,6 +94,8 @@ const getPropertyById = async (propertyId: string) => {
         },
       },
     });
+
+    // Return updated property
     return await tx.property.findUnique({
       where: {
         id: propertyId,
@@ -99,11 +116,26 @@ const getPropertyById = async (propertyId: string) => {
 
   return transactionResult;
 };
-
+// get all property categories
 const getAllPropertyCategories = async () => {
-  return Object.values(PropertyCategory);
-};
+  // return Object.values(PropertyCategory);
+  const result = await prisma.property.findMany({
+    select: {
+      category: true,
+    },
+    distinct: ["category"],
+  });
 
+  if (result.length === 0) {
+    throw new Error(
+    
+      "Property categories not found"
+    );
+  }
+
+  return result.map((item) => item.category);
+};
+// get admin properties
 const getAdminProperties = async () => {
   const result = await prisma.property.findMany({
     include: {
@@ -123,6 +155,7 @@ const getAdminProperties = async () => {
 
   return result;
 };
+// update Property
 const updateProperty = async (
   propertyId: string,
   payload: propertyUpdatePayload,
@@ -168,13 +201,14 @@ const updateProperty = async (
     data: updateData,
   });
 };
+// update Rental Request Status
 const updateRentalRequestStatus = async (
   rentalRequestId: string,
   landlordId: string,
-  status: RentalRequestStatus
+  status: RentalRequestStatus,
 ) => {
   if (!rentalRequestId) {
-    throw new Error( "Rental request ID is required");
+    throw new Error("Rental request ID is required");
   }
 
   const rentalRequest = await prisma.rentalRequest.findUnique({
@@ -187,21 +221,15 @@ const updateRentalRequestStatus = async (
   });
 
   if (!rentalRequest) {
-    throw new Error( "Rental request not found");
+    throw new Error("Rental request not found");
   }
 
   if (rentalRequest.property.authorId !== landlordId) {
-    throw new Error(
-      
-      "You are not authorized to update this rental request"
-    );
+    throw new Error("You are not authorized to update this rental request");
   }
 
   if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
-    throw new Error(
-    
-      "This rental request has already been processed"
-    );
+    throw new Error("This rental request has already been processed");
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -241,7 +269,7 @@ const updateRentalRequestStatus = async (
     return updatedRequest;
   });
 };
-
+// delete property
 const deleteProperty = async (
   propertyId: string,
   authorId: string,

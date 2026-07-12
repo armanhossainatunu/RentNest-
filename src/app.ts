@@ -25,9 +25,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", userRouter);
-app.use("/api/admin", userRouter, rentalRouter);
-app.use("/api/admin", rentalRouter);
 app.use("/api/admin", userRouter);
+app.use("/api/admin", rentalRouter);
+// app.use("/api/admin", userRouter);
 
 app.use("/api/auth/", authRoute);
 app.use("/api/landlord", propertyRouter);

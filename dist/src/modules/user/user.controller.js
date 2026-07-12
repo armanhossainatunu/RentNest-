@@ -23,7 +23,6 @@ const getAllUsers = catchAsync(async (req, res, next) => {
 });
 const getProfile = catchAsync(async (req, res, next) => {
     const profile = await userService.getProfileBD(req.user?.userId);
-    console.log(profile);
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
@@ -38,4 +37,3 @@ export const userController = {
     getAllUsers,
     getProfile,
 };
-//# sourceMappingURL=user.controller.js.map

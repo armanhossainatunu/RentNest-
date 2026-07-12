@@ -3,33 +3,45 @@ import { prisma } from "../../lib/prisma";
 import { jwtUtils } from "../../utils/jwt";
 import { LoginPayload } from "./auth.interface";
 import bcrypt from "bcrypt";
-import jwt, {  SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 const loginUser = async (payload: LoginPayload) => {
   const { email, password } = payload;
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { email },
+
+  const emailLowerCase = email.toLowerCase();
+
+  const user = await prisma.user.findUnique({
+    where: { email : emailLowerCase },
+
+    include: {
+      profile: true,
+    },
+   
   });
-  if (user.status === "INACTIVE") {
-    throw new Error("User is inactive");
+
+  if (!user) {
+    throw new Error("User not found");
   }
+
   const isPasswordMatched = await bcrypt.compare(password, user.password);
+
   if (!isPasswordMatched) {
-    throw new Error("password is Incorrect");
+    throw new Error("Password is incorrect");
   }
-  const jwtPaylode = {
+
+  const jwtPayload = {
     name: user.name,
     userId: user.id,
     email: user.email,
     role: user.role,
   };
-  //access token
-  const accessToken = jwtUtils.createToken(jwtPaylode, config.jwt_secret_key, {
+
+  const accessToken = jwtUtils.createToken(jwtPayload, config.jwt_secret_key, {
     expiresIn: config.jwt_expires_in,
   } as SignOptions);
-  // refresh token
+
   const refreshToken = jwtUtils.createToken(
-    jwtPaylode,
+    jwtPayload,
     config.jwt_refresh_secret_key,
     {
       expiresIn: config.jwt_refresh_expires_in,
@@ -37,12 +49,17 @@ const loginUser = async (payload: LoginPayload) => {
   );
 
   return {
-    user,
+    user:{
+      name: user.name,
+      email: user.email,
+      userId: user.id,
+      role: user.role
+    },
     accessToken,
     refreshToken,
   };
 };
 
 export const authService = {
-  loginUser
+  loginUser,
 };

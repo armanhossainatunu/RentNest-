@@ -7,6 +7,7 @@ import { $Enums } from "../../../generated/prisma/browser";
 
 const registerIntoDB = async (payload: registerPayload) => {
   const { name, email, password, profilePhoto } = payload;
+  const emailLowerCase = email.toLowerCase();
   const role = payload.role?.toUpperCase() as Role;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -25,7 +26,7 @@ const registerIntoDB = async (payload: registerPayload) => {
   const createdUser = await prisma.user.create({
     data: {
       name,
-      email,
+      email : emailLowerCase,
       password: hashedPassword,
       role,
       profile: {
@@ -86,10 +87,35 @@ const updateUserStatus = async (userId: string, status: $Enums.Status) => {
 
   return user;
 };
+const userDelete = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
 
+  if (!user) {
+    throw new Error( "User not found");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.profile.deleteMany({
+      where: {
+        userId,
+      },
+    });
+
+    await tx.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+  });
+
+  return null;
+};
 export const userService = {
   registerIntoDB,
   getAllUsers,
   getProfileBD,
   updateUserStatus,
+  userDelete,
 };

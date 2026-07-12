@@ -30,4 +30,9 @@ router.put(
   auth(Role.ADMIN),
   userController.updateUserStatus,
 )
+router.delete(
+  "/users/:id",
+  auth(Role.ADMIN),
+  userController.userDelete,
+)
 export const userRouter = router;
