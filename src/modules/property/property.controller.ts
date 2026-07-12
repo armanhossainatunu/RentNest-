@@ -4,6 +4,7 @@ import { propertyService } from "./property.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { Role } from "../../../generated/prisma/enums";
+import { rentalService } from "../Rental/Rental.service";
 
 const createProperty = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -93,6 +94,32 @@ const updateProperty = catchAsync(
     });
   },
 );
+
+const updateRentalRequestStatus = catchAsync(async (req, res) => {
+  const rentalRequestId = req.params.id;
+  const landlordId = req.user?.userId;
+
+  console.log("Body:", req.body);
+
+  const status = req.body?.status?.toUpperCase();
+
+  if (!status) {
+    throw new Error( "Status is required");
+  }
+
+  const result = await propertyService.updateRentalRequestStatus(
+    rentalRequestId as string,
+    landlordId as string,
+    status
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: `Rental request ${status.toLowerCase()} successfully`,
+    data: result,
+  });
+});
 const deleteProperty = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const propertyId = req.params?.id;
@@ -120,5 +147,6 @@ export const propertyController = {
   getAdminProperties,
   getSingleProperty: getPropertyById,
   updateProperty,
+  updateRentalRequestStatus,
   deleteProperty,
 };

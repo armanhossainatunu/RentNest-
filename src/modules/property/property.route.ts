@@ -32,4 +32,10 @@ router.delete(
   auth(Role.LANDLORD, Role.ADMIN),
   propertyController.deleteProperty,
 );
+
+router.put(
+  "/requests/:id",
+  auth(Role.LANDLORD, Role.ADMIN),
+  propertyController.updateRentalRequestStatus,
+);
 export const propertyRouter = router;

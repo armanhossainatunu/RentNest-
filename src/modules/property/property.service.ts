@@ -1,4 +1,10 @@
-import { Prisma, PropertyCategory, PropertyStatus, Role } from "../../../generated/prisma/client";
+import {
+  Prisma,
+  PropertyCategory,
+  PropertyStatus,
+  RentalRequestStatus,
+  Role,
+} from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { propertyPayload, propertyUpdatePayload } from "./property.interface";
 
@@ -62,38 +68,7 @@ const getAllProperties = async (query: Record<string, any>) => {
   return result;
 };
 const getPropertyById = async (propertyId: string) => {
-  // const property = await prisma.property.findUnique({
-  //   where: {
-  //     id: propertyId,
-  //   },
-  // });
-  // if(!property) {
-  //   throw new Error("Property id not found");
-  // }
-  // const viewsUpdated = await prisma.property.update({
-  //   include: {
-  //     author: {
-  //       select: {
-  //         id: true,
-  //         name: true,
-  //         email: true,
-  //         role: true,
-  //       },
-  //     },
-  //     reviews: true,
-  //   },
-  //   where: {
-  //     id: propertyId,
-  //   },
-  //   data: {
-  //     views: property.views + 1,
-  //   },
-  // });
-
-  // return viewsUpdated;
-
-const transactionResult = await prisma.$transaction(
-  async(tx) =>{
+  const transactionResult = await prisma.$transaction(async (tx) => {
     await tx.property.update({
       where: {
         id: propertyId,
@@ -119,22 +94,12 @@ const transactionResult = await prisma.$transaction(
         },
         reviews: true,
       },
-    })
-  }
-);
+    });
+  });
 
-return transactionResult;
+  return transactionResult;
 };
-// const getAllPropertyCategories = async () => {
-//   const result = await prisma.property.findMany({
-//     // select: {
-//     //   category: true,
-//     // },
-//     // // distinct: ["category"],
-//     
-//   });
-//   return result;
-// }
+
 const getAllPropertyCategories = async () => {
   return Object.values(PropertyCategory);
 };
@@ -168,7 +133,7 @@ const updateProperty = async (
       id: propertyId,
     },
   });
-  if(!property) {
+  if (!property) {
     throw new Error("Property not found");
   }
 
@@ -176,7 +141,7 @@ const updateProperty = async (
     throw new Error("You are not authorized to update this property");
   }
 
- const updateData = {
+  const updateData = {
     ...payload,
     ...(payload.category && {
       category: payload.category.toUpperCase() as PropertyCategory,
@@ -185,7 +150,6 @@ const updateProperty = async (
       status: payload.status.toUpperCase() as PropertyStatus,
     }),
   };
-
 
   return await prisma.property.update({
     include: {
@@ -201,10 +165,88 @@ const updateProperty = async (
     where: {
       id: propertyId,
     },
-    data: updateData
+    data: updateData,
   });
 };
-const deleteProperty = async (propertyId: string, authorId: string, userRole: Role) => {
+const updateRentalRequestStatus = async (
+  rentalRequestId: string,
+  landlordId: string,
+  status: RentalRequestStatus
+) => {
+  if (!rentalRequestId) {
+    throw new Error( "Rental request ID is required");
+  }
+
+  const rentalRequest = await prisma.rentalRequest.findUnique({
+    where: {
+      id: rentalRequestId,
+    },
+    include: {
+      property: true,
+    },
+  });
+
+  if (!rentalRequest) {
+    throw new Error( "Rental request not found");
+  }
+
+  if (rentalRequest.property.authorId !== landlordId) {
+    throw new Error(
+      
+      "You are not authorized to update this rental request"
+    );
+  }
+
+  if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
+    throw new Error(
+    
+      "This rental request has already been processed"
+    );
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    const updatedRequest = await tx.rentalRequest.update({
+      where: {
+        id: rentalRequestId,
+      },
+      data: {
+        rentalstatus: status,
+      },
+    });
+
+    if (status === RentalRequestStatus.APPROVED) {
+      await tx.property.update({
+        where: {
+          id: rentalRequest.propertyId,
+        },
+        data: {
+          status: PropertyStatus.UNAVAILABLE,
+        },
+      });
+
+      await tx.rentalRequest.updateMany({
+        where: {
+          propertyId: rentalRequest.propertyId,
+          id: {
+            not: rentalRequestId,
+          },
+          status: RentalRequestStatus.PENDING,
+        },
+        data: {
+          status: RentalRequestStatus.REJECTED,
+        },
+      });
+    }
+
+    return updatedRequest;
+  });
+};
+
+const deleteProperty = async (
+  propertyId: string,
+  authorId: string,
+  userRole: Role,
+) => {
   // const property = await prisma.property.findUniqueOrThrow({
   //   where: {
   //     id: propertyId,
@@ -215,7 +257,7 @@ const deleteProperty = async (propertyId: string, authorId: string, userRole: Ro
       id: propertyId,
     },
   });
-if (!property) {
+  if (!property) {
     throw new Error("Property not found");
   }
   if (userRole !== Role.ADMIN && property.authorId !== authorId) {
@@ -235,5 +277,6 @@ export const propertyService = {
   getAdminProperties,
   getPropertyById,
   updateProperty,
+  updateRentalRequestStatus,
   deleteProperty,
 };
