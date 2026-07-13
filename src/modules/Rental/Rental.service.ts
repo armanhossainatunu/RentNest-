@@ -80,7 +80,7 @@ const getRentalRequestDetails = async (
           id: true,
           name: true,
           email: true,
-          profile: true,
+          role: true,
         },
       },
       property: {
@@ -90,6 +90,7 @@ const getRentalRequestDetails = async (
               id: true,
               name: true,
               email: true,
+              role: true,
             },
           },
         },

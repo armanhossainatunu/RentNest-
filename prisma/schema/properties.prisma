@@ -1,21 +1,22 @@
 model Property {
-  id             String           @id @default(uuid())
-  title          String           @db.VarChar(255)
-  thumbnail      String?
-  description    String           @db.Text
-  price          Float
-  status         PropertyStatus   @default(AVAILABLE)
-  authorId       String
-  author         User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  location       String
-  bedrooms       Int?
-  bathrooms      Int?
-  balconies      Int?
-  category       PropertyCategory @default(APARTMENT)
-  views          Int              @default(0)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  reviews        Review[]
+  id          String           @id @default(uuid())
+  title       String           @db.VarChar(255)
+  thumbnail   String?
+  description String           @db.Text
+  price       Float
+  status      PropertyStatus   @default(AVAILABLE)
+  authorId    String
+  author      User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  location    String
+  bedrooms    Int?
+  bathrooms   Int?
+  balconies   Int?
+  category    PropertyCategory @default(APARTMENT)
+  views       Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  reviews     Review[]
+
   rentalRequests RentalRequest[]
 
   @@index([authorId])

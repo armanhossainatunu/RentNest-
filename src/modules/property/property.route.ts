@@ -13,8 +13,10 @@ router.post(
 );
 // get all properties
 router.get("/properties", propertyController.getAllProperties);
+
 // get all property categories
 router.get("/categories", propertyController.getAllPropertyCategories);
+
 // get admin properties
 router.get(
   "/admin/properties",
@@ -29,16 +31,22 @@ router.put(
   auth(Role.LANDLORD, Role.ADMIN),
   propertyController.updateProperty,
 );
+// update Rental requests
+router.put(
+  "/requests/:id",
+  auth(Role.LANDLORD, Role.ADMIN),
+  propertyController.updateRentalRequestStatus,
+);
+// get landlord rental requests
+router.get(
+  "/landlord/requests",
+  auth(Role.LANDLORD),
+  propertyController.getLandlordRentalRequests
+);
 // delete property
 router.delete(
   "/properties/:id",
   auth(Role.LANDLORD, Role.ADMIN),
   propertyController.deleteProperty,
-);
-// Rental requests
-router.put(
-  "/requests/:id",
-  auth(Role.LANDLORD, Role.ADMIN),
-  propertyController.updateRentalRequestStatus,
 );
 export const propertyRouter = router;

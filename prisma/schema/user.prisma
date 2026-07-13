@@ -1,16 +1,17 @@
 model User {
-  id         String     @id @default(uuid())
-  name       String     @db.VarChar(255)
-  email      String     @unique
-  password   String
-  status     Status     @default(ACTIVE)
-  role       Role
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  profile    Profile?
-  properties Property[]
-  reviews    Review[]
-  rentalRequests  RentalRequest[]
+  id             String          @id @default(uuid())
+  name           String          @db.VarChar(255)
+  email          String          @unique
+  password       String
+  status         Status          @default(ACTIVE)
+  role           Role
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  profile        Profile?
+  properties     Property[]
+  reviews        Review[]
+  rentalRequests RentalRequest[]
+  payments       Payment[]
 
   @@map("users")
 }

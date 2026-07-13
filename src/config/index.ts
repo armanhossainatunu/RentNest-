@@ -14,4 +14,6 @@ export const config = {
   jwt_expires_in: process.env.JWT_EXPIRES!,
   jwt_refresh_secret_key: process.env.JWT_REFRESH_SECRET_KEY!,
   jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES!,
+  ssl_commerz_store_id: process.env.SSLCOMMERZ_STORE_ID,
+  ssl_commerz_store_password: process.env.SSLCOMMERZ_STORE_PASSWORD,
 };

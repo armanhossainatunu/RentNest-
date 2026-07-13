@@ -3,14 +3,21 @@ import { catchAsync } from "../../utils/catchAsync";
 import { propertyService } from "./property.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
-import { Role } from "../../../generated/prisma/enums";
+import { PropertyCategory, Role } from "../../../generated/prisma/enums";
 import { rentalService } from "../Rental/Rental.service";
 // create property
 const createProperty = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.user?.userId;
 
+    if (!id) {
+      throw new Error("User id is required");
+    }
     const payload = req.body;
+
+    if (payload.category) {
+        payload.category = payload.category.toUpperCase() as PropertyCategory;
+      }
 
     const property = await propertyService.createProperty(
       payload,
@@ -101,30 +108,69 @@ const updateProperty = catchAsync(
   },
 );
 // update rental request
-const updateRentalRequestStatus = catchAsync(async (req, res) => {
-  const rentalRequestId = req.params.id;
-  const landlordId = req.user?.userId;
+// const updateRentalRequestStatus = catchAsync(async (req : Request, res: Response, next: NextFunction) => {
+//   const rentalRequestId = req.params.id;
+//   const landlordId = req.user?.userId;
 
 
-  const status = req.body?.status?.toUpperCase();
+//   const status = req.body?.status?.toUpperCase();
 
-  if (!status) {
-    throw new Error( "Status is required");
+//   if (!status) {
+//     throw new Error( "Status is required");
+//   }
+
+//   const result = await propertyService.updateRentalRequestStatus(
+//     rentalRequestId as string,
+//     landlordId as string,
+//     status
+//   );
+
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: 200,
+//     message: `Rental request ${status.toLowerCase()} successfully`,
+//     data: result,
+//   });
+// });
+const updateRentalRequestStatus = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const rentalRequestId = req.params.id;
+    const landlordId = req.user?.userId;
+
+    const rentalstatus = req.body?.rentalstatus?.toUpperCase();
+
+    if (!rentalstatus) {
+      throw new Error("Rental status is required");
+    }
+
+    const result = await propertyService.updateRentalRequestStatus(
+      rentalRequestId as string,
+      landlordId as string,
+      rentalstatus
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: `Rental request ${rentalstatus.toLowerCase()} successfully`,
+      data: result,
+    });
   }
+);
 
-  const result = await propertyService.updateRentalRequestStatus(
-    rentalRequestId as string,
-    landlordId as string,
-    status
-  );
-
+// get landlord rental requests
+const  getLandlordRentalRequests = catchAsync(async (req, res) => {
+  const landlordId = req.user?.userId;
+  const result = await propertyService.getLandlordRentalRequests(landlordId as string);
   sendResponse(res, {
     success: true,
     statusCode: 200,
-    message: `Rental request ${status.toLowerCase()} successfully`,
+    message: "Rental requests retrieved successfully",
     data: result,
   });
-});
+})
+
+
 // delete property
 const deleteProperty = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -154,5 +200,6 @@ export const propertyController = {
   getSingleProperty: getPropertyById,
   updateProperty,
   updateRentalRequestStatus,
+  getLandlordRentalRequests,
   deleteProperty,
 };

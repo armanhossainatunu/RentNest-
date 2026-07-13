@@ -8,15 +8,25 @@ enum Status {
   ACTIVE
   BANNED
 }
+
 enum RentalRequestStatus {
   PENDING
   APPROVED
   REJECTED
 }
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
 enum PropertyStatus {
   AVAILABLE
   UNAVAILABLE
 }
+
 enum PropertyCategory {
   APARTMENT
   HOUSE

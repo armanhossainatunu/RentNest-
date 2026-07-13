@@ -28,7 +28,7 @@ router.get(
 
 // Admin all rental requests
 router.get(
-  "/rentals",
+  "/admin/rentals",
   auth(Role.ADMIN),
   rentalController.getAllRentalRequests,
 );
