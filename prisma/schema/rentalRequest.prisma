@@ -6,7 +6,7 @@ model RentalRequest {
 
   message      String?
   rentalstatus RentalRequestStatus @default(PENDING)
-
+  
   payment Payment?
 
   tenant   User     @relation(fields: [tenantId], references: [id], onDelete: Cascade)

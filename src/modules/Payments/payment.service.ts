@@ -1,44 +1,47 @@
 import { Property, User } from "../../../generated/prisma/client";
 import { config } from "../../config";
+import axios from "axios";
 
-const initializePayment = (property : Property, user : User ) => {
-  const paymentData = {
-    store_id: config.ssl_commerz_store_id,
-    store_passwd: config.ssl_commerz_store_password,
+const initializePayment = async (property: Property, user: User) => {
+  const transactionId = `TRNX_ID_${Date.now()}`;
 
-    total_amount: 100,
-    currency: "BDT",
+  const form = new URLSearchParams();
+  form.append("store_id", String(config.ssl_commerz_store_id ?? ""));
+  form.append("store_passwd", String(config.ssl_commerz_store_password ?? ""));
+  form.append("total_amount", String(property.price));
+  form.append("currency", "BDT");
+  form.append("tran_id", transactionId);
 
-    tran_id: "REF123",
+  const baseAppUrl = config.app_url
+    ? String(config.app_url).replace(/\/$/, "")
+    : "";
+  form.append("success_url", `${baseAppUrl}/payments/success`);
+  form.append("fail_url", `${baseAppUrl}/payments/fail`);
+  form.append("cancel_url", `${baseAppUrl}/payments/cancel`);
 
-    success_url: "http://yoursite.com/success.php",
-    fail_url: "http://yoursite.com/fail.php",
-    cancel_url: "http://yoursite.com/cancel.php",
+  form.append("cus_name", user.name ?? "");
+  form.append("cus_email", user.email ?? "");
+  form.append("cus_add1", "N/A");
+  form.append("cus_add2", "N/A");
+  form.append("cus_city", "N/A");
+  form.append("cus_state", "N/A");
+  form.append("cus_postcode", "1000");
+  form.append("cus_country", "Bangladesh");
+  form.append("cus_phone", user.email ?? "");
 
-    cus_name: "Customer Name",
-    cus_email: "cust@yahoo.com",
-    cus_add1: "Dhaka",
-    cus_add2: "Dhaka",
-    cus_city: "Dhaka",
-    cus_state: "Dhaka",
-    cus_postcode: "1000",
-    cus_country: "Bangladesh",
-    cus_phone: "01711111111",
-    cus_fax: "01711111111",
+  const response = await axios.post(
+    "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
+    form.toString(),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    },
+  );
 
-    ship_name: "Customer Name",
-    ship_add1: "Dhaka",
-    ship_add2: "Dhaka",
-    ship_city: "Dhaka",
-    ship_state: "Dhaka",
-    ship_postcode: "1000",
-    ship_country: "Bangladesh",
-
-    multi_card_name: "mastercard,visacard,amexcard",
-
-    value_a: "ref001_A",
-    value_b: "ref002_B",
-    value_c: "ref003_C",
-    value_d: "ref004_D",
-  };
+  const data = response.data;
+  console.log("SSLCommerz init response:", data);
+  return data;
 };
+
+export { initializePayment };
