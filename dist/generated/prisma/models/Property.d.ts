@@ -557,13 +557,6 @@ export type PropertyListRelationFilter = {
 export type PropertyOrderByRelationAggregateInput = {
     _count?: Prisma.SortOrder;
 };
-export type FloatFieldUpdateOperationsInput = {
-    set?: number;
-    increment?: number;
-    decrement?: number;
-    multiply?: number;
-    divide?: number;
-};
 export type EnumPropertyStatusFieldUpdateOperationsInput = {
     set?: $Enums.PropertyStatus;
 };
@@ -583,9 +576,6 @@ export type IntFieldUpdateOperationsInput = {
     decrement?: number;
     multiply?: number;
     divide?: number;
-};
-export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string;
 };
 export type PropertyCreateNestedOneWithoutRentalRequestsInput = {
     create?: Prisma.XOR<Prisma.PropertyCreateWithoutRentalRequestsInput, Prisma.PropertyUncheckedCreateWithoutRentalRequestsInput>;

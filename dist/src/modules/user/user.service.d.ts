@@ -1,5 +1,5 @@
 import { registerPayload } from "./user.interface";
-import { Role } from "../../../generated/prisma/enums";
+import { $Enums } from "../../../generated/prisma/browser";
 export declare const userService: {
     registerIntoDB: (payload: registerPayload) => Promise<({
         profile: {
@@ -12,8 +12,8 @@ export declare const userService: {
         id: string;
         email: string;
         name: string;
-        status: import("../../../generated/prisma/enums").Status;
-        role: Role;
+        status: $Enums.Status;
+        role: $Enums.Role;
         createdAt: Date;
         updatedAt: Date;
     }) | null>;
@@ -28,8 +28,8 @@ export declare const userService: {
         id: string;
         email: string;
         name: string;
-        status: import("../../../generated/prisma/enums").Status;
-        role: Role;
+        status: $Enums.Status;
+        role: $Enums.Role;
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -44,10 +44,21 @@ export declare const userService: {
         id: string;
         email: string;
         name: string;
-        status: import("../../../generated/prisma/enums").Status;
-        role: Role;
+        status: $Enums.Status;
+        role: $Enums.Role;
         createdAt: Date;
         updatedAt: Date;
     }>;
+    updateUserStatus: (userId: string, status: $Enums.Status) => Promise<{
+        id: string;
+        email: string;
+        name: string;
+        password: string;
+        status: $Enums.Status;
+        role: $Enums.Role;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    userDelete: (userId: string) => Promise<null>;
 };
 //# sourceMappingURL=user.service.d.ts.map

@@ -32,8 +32,32 @@ const getProfile = catchAsync(async (req, res, next) => {
         },
     });
 });
+const updateUserStatus = catchAsync(async (req, res, next) => {
+    const userId = req.params.id;
+    const status = req.body.status;
+    const user = await userService.updateUserStatus(userId, status);
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User status updated successfully",
+        data: { user },
+    });
+});
+const userDelete = catchAsync(async (req, res, next) => {
+    const userId = req.params.id;
+    const user = await userService.userDelete(userId);
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User deleted successfully",
+        data: { user },
+    });
+});
 export const userController = {
     register,
     getAllUsers,
     getProfile,
+    updateUserStatus,
+    userDelete
 };
+//# sourceMappingURL=user.controller.js.map

@@ -5,9 +5,16 @@ import { Role } from "../../../generated/prisma/enums";
 
 const route = Router();
 
-route.post("/create", auth(Role.TENANT), paymentController.initiatePayment);
-route.post("/success", paymentController.success);
-route.post("/fail", paymentController.fail);
-route.post("/cancel", paymentController.cancel);
+// Create a payment intent/session for an approved rental
+route.post("/create", auth(Role.TENANT), paymentController.createPaymentSession);
+
+// Confirm/verify payment (webhook or callback)
+route.post("/confirm", paymentController.confirmPayment);
+
+// Get user's payment history
+route.get("/", auth(Role.TENANT, Role.LANDLORD, Role.ADMIN), paymentController.getPaymentHistory);
+
+// Get payment details
+route.get("/:id", auth(Role.TENANT, Role.LANDLORD, Role.ADMIN), paymentController.getPaymentDetails);
 
 export const paymentRouter = route;

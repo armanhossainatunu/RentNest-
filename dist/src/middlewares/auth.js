@@ -36,7 +36,7 @@ const auth = (...requiredRole) => {
         if (!user) {
             throw new Error("User not found");
         }
-        if (user.status === "INACTIVE") {
+        if (user.status === "BANNED") {
             throw new Error("User is inactive");
         }
         req.user = { name, email, userId, role };

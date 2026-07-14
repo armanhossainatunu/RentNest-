@@ -7,5 +7,7 @@ export declare const config: {
     jwt_expires_in: string;
     jwt_refresh_secret_key: string;
     jwt_refresh_expires_in: string;
+    ssl_commerz_store_id: string | undefined;
+    ssl_commerz_store_password: string | undefined;
 };
 //# sourceMappingURL=index.d.ts.map

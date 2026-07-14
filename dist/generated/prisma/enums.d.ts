@@ -6,7 +6,7 @@ export declare const Role: {
 export type Role = (typeof Role)[keyof typeof Role];
 export declare const Status: {
     readonly ACTIVE: "ACTIVE";
-    readonly INACTIVE: "INACTIVE";
+    readonly BANNED: "BANNED";
 };
 export type Status = (typeof Status)[keyof typeof Status];
 export declare const RentalRequestStatus: {
@@ -15,6 +15,13 @@ export declare const RentalRequestStatus: {
     readonly REJECTED: "REJECTED";
 };
 export type RentalRequestStatus = (typeof RentalRequestStatus)[keyof typeof RentalRequestStatus];
+export declare const PaymentStatus: {
+    readonly PENDING: "PENDING";
+    readonly PAID: "PAID";
+    readonly FAILED: "FAILED";
+    readonly CANCELLED: "CANCELLED";
+};
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
 export declare const PropertyStatus: {
     readonly AVAILABLE: "AVAILABLE";
     readonly UNAVAILABLE: "UNAVAILABLE";

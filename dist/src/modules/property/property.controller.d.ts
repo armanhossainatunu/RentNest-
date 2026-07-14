@@ -6,6 +6,8 @@ export declare const propertyController: {
     getAdminProperties: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     getSingleProperty: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     updateProperty: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    updateRentalRequestStatus: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    getLandlordRentalRequests: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     deleteProperty: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 };
 //# sourceMappingURL=property.controller.d.ts.map

@@ -4,7 +4,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 const loginUser = catchAsync(async (req, res, next) => {
     const payload = req.body;
-    const { accessToken, refreshToken } = await authService.loginUser(payload);
+    const { accessToken, refreshToken, user } = await authService.loginUser(payload);
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: false,
@@ -22,6 +22,7 @@ const loginUser = catchAsync(async (req, res, next) => {
         statusCode: httpStatus.OK,
         message: "User logged in successfully",
         data: {
+            user,
             accessToken,
             refreshToken,
         },

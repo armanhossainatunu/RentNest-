@@ -1,5 +1,6 @@
 import { Role } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
+import { paymentService } from "../Payments/payment.service";
 
 const createRentalRequest = async (
   tenantId: string,
@@ -27,7 +28,7 @@ const createRentalRequest = async (
     throw new Error("Rental request already submitted");
   }
 
-  return prisma.rentalRequest.create({
+  const data = await prisma.rentalRequest.create({
     data: {
       tenantId,
       propertyId,
@@ -37,6 +38,13 @@ const createRentalRequest = async (
       property: true,
     },
   });
+  // const payment = paymentService.initializePayment(request.property, tenantId as any);
+ 
+
+  return {
+    ...data,
+    payment: null
+  };
 };
 
 const getMyRentalRequests = async (tenantId: string) => {

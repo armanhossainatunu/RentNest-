@@ -14,12 +14,18 @@ export const Role = {
 };
 export const Status = {
     ACTIVE: 'ACTIVE',
-    INACTIVE: 'INACTIVE'
+    BANNED: 'BANNED'
 };
 export const RentalRequestStatus = {
     PENDING: 'PENDING',
     APPROVED: 'APPROVED',
     REJECTED: 'REJECTED'
+};
+export const PaymentStatus = {
+    PENDING: 'PENDING',
+    PAID: 'PAID',
+    FAILED: 'FAILED',
+    CANCELLED: 'CANCELLED'
 };
 export const PropertyStatus = {
     AVAILABLE: 'AVAILABLE',

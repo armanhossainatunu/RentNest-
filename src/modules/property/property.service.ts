@@ -4,6 +4,7 @@ import {
   PropertyStatus,
   RentalRequestStatus,
   Role,
+  PaymentStatus,
 } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";;
 import { propertyPayload, propertyUpdatePayload } from "./property.interface";
@@ -433,7 +434,15 @@ const updateRentalRequestStatus = async (
       });
 
       // Create Payment Record
-    
+      await tx.payment.create({
+        data: {
+          userId: rentalRequest.tenantId,
+          rentalRequestId: rentalRequestId,
+          amount: rentalRequest.property.price,
+          status: PaymentStatus.PENDING,
+          meta: {},
+        },
+      });
     }
 
     return updatedRequest;

@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { config } from "../../config";
 const registerIntoDB = async (payload) => {
     const { name, email, password, profilePhoto } = payload;
+    const emailLowerCase = email.toLowerCase();
     const role = payload.role?.toUpperCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -18,7 +19,7 @@ const registerIntoDB = async (payload) => {
     const createdUser = await prisma.user.create({
         data: {
             name,
-            email,
+            email: emailLowerCase,
             password: hashedPassword,
             role,
             profile: {
@@ -49,7 +50,7 @@ const getAllUsers = async () => {
         },
         omit: {
             password: true,
-        }
+        },
     });
     return users;
 };
@@ -65,9 +66,44 @@ const getProfileBD = async (useId) => {
     });
     return user;
 };
+const updateUserStatus = async (userId, status) => {
+    const formattedStatus = status.toUpperCase();
+    const user = await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            status: formattedStatus,
+        },
+    });
+    return user;
+};
+const userDelete = async (userId) => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+    if (!user) {
+        throw new Error("User not found");
+    }
+    await prisma.$transaction(async (tx) => {
+        await tx.profile.deleteMany({
+            where: {
+                userId,
+            },
+        });
+        await tx.user.delete({
+            where: {
+                id: userId,
+            },
+        });
+    });
+    return null;
+};
 export const userService = {
     registerIntoDB,
     getAllUsers,
     getProfileBD,
+    updateUserStatus,
+    userDelete,
 };
 //# sourceMappingURL=user.service.js.map

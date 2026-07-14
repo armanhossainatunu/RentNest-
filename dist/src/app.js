@@ -5,6 +5,7 @@ import { userRouter } from "./modules/user/user.route";
 import { authRoute } from "./modules/auth/auth.route";
 import { propertyRouter } from "./modules/property/property.route";
 import { reviewRouter } from "./modules/review/review.route";
+import { paymentRouter } from "./modules/Payments/payment.route";
 import { rentalRouter } from "./modules/Rental/Rental.route";
 const app = express();
 app.use(cors({
@@ -19,9 +20,12 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", userRouter);
 app.use("/api/admin", userRouter);
+// app.use("/api/admin", userRouter);
 app.use("/api/auth/", authRoute);
 app.use("/api/landlord", propertyRouter);
-app.use("/api/", propertyRouter, rentalRouter);
+app.use("/api/", propertyRouter);
+app.use("/api", rentalRouter);
 app.use("/api/", reviewRouter);
+app.use("/api/payments", paymentRouter);
 export default app;
 //# sourceMappingURL=app.js.map

@@ -1,5 +1,7 @@
-import { PropertyCategory, Role } from "../../../generated/prisma/client";
+import { PropertyStatus, RentalRequestStatus, Role, PaymentStatus, } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
+;
+// create property
 const createProperty = async (payload, userId) => {
     const result = await prisma.property.create({
         data: {
@@ -9,6 +11,16 @@ const createProperty = async (payload, userId) => {
     });
     return result;
 };
+// const createProperty = async (payload: propertyPayload, userId: string) => {
+//   const result = await prisma.property.create({
+//     data: {
+//       ...payload,
+//       authorId: userId,
+//     },
+//   });
+//   return result;
+// };
+// get all properties
 const getAllProperties = async (query) => {
     const { location, category, minPrice, maxPrice } = query;
     const where = {};
@@ -52,36 +64,19 @@ const getAllProperties = async (query) => {
     }
     return result;
 };
+// get property by id
 const getPropertyById = async (propertyId) => {
-    // const property = await prisma.property.findUnique({
-    //   where: {
-    //     id: propertyId,
-    //   },
-    // });
-    // if(!property) {
-    //   throw new Error("Property id not found");
-    // }
-    // const viewsUpdated = await prisma.property.update({
-    //   include: {
-    //     author: {
-    //       select: {
-    //         id: true,
-    //         name: true,
-    //         email: true,
-    //         role: true,
-    //       },
-    //     },
-    //     reviews: true,
-    //   },
-    //   where: {
-    //     id: propertyId,
-    //   },
-    //   data: {
-    //     views: property.views + 1,
-    //   },
-    // });
-    // return viewsUpdated;
     const transactionResult = await prisma.$transaction(async (tx) => {
+        // Check property exists
+        const property = await tx.property.findUnique({
+            where: {
+                id: propertyId,
+            },
+        });
+        if (!property) {
+            throw new Error("Property not found");
+        }
+        // Increment views
         await tx.property.update({
             where: {
                 id: propertyId,
@@ -92,6 +87,7 @@ const getPropertyById = async (propertyId) => {
                 },
             },
         });
+        // Return updated property
         return await tx.property.findUnique({
             where: {
                 id: propertyId,
@@ -111,19 +107,21 @@ const getPropertyById = async (propertyId) => {
     });
     return transactionResult;
 };
-// const getAllPropertyCategories = async () => {
-//   const result = await prisma.property.findMany({
-//     // select: {
-//     //   category: true,
-//     // },
-//     // // distinct: ["category"],
-//     
-//   });
-//   return result;
-// }
+// get all property categories
 const getAllPropertyCategories = async () => {
-    return Object.values(PropertyCategory);
+    // return Object.values(PropertyCategory);
+    const result = await prisma.property.findMany({
+        select: {
+            category: true,
+        },
+        distinct: ["category"],
+    });
+    if (result.length === 0) {
+        throw new Error("Property categories not found");
+    }
+    return result.map((item) => item.category);
 };
+// get admin properties
 const getAdminProperties = async () => {
     const result = await prisma.property.findMany({
         include: {
@@ -142,6 +140,7 @@ const getAdminProperties = async () => {
     });
     return result;
 };
+// update Property
 const updateProperty = async (propertyId, payload, authorId) => {
     const property = await prisma.property.findUnique({
         where: {
@@ -177,9 +176,230 @@ const updateProperty = async (propertyId, payload, authorId) => {
         where: {
             id: propertyId,
         },
-        data: updateData
+        data: updateData,
     });
 };
+// update Rental Request Status
+// const updateRentalRequestStatus = async (
+//   rentalRequestId: string,
+//   landlordId: string,
+//   status: RentalRequestStatus,
+// ) => {
+//   if (!rentalRequestId) {
+//     throw new Error("Rental request ID is required");
+//   }
+//   const rentalRequest = await prisma.rentalRequest.findUnique({
+//     where: {
+//       id: rentalRequestId,
+//     },
+//     include: {
+//       property: true,
+//     },
+//   });
+//   if (!rentalRequest) {
+//     throw new Error("Rental request not found");
+//   }
+//   if (rentalRequest.property.authorId !== landlordId) {
+//     throw new Error("You are not authorized to update this rental request");
+//   }
+//   if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
+//     throw new Error("This rental request has already been processed");
+//   }
+//   return await prisma.$transaction(async (tx) => {
+//     const updatedRequest = await tx.rentalRequest.update({
+//       where: {
+//         id: rentalRequestId,
+//       },
+//       data: {
+//         rentalstatus: status,
+//       },
+//     });
+//     if (status === RentalRequestStatus.APPROVED) {
+//       await tx.property.update({
+//         where: {
+//           id: rentalRequest.propertyId,
+//         },
+//         data: {
+//           status: PropertyStatus.UNAVAILABLE,
+//         },
+//       });
+//       await tx.rentalRequest.updateMany({
+//         where: {
+//           propertyId: rentalRequest.propertyId,
+//           id: {
+//             not: rentalRequestId,
+//           },
+//           status: RentalRequestStatus.PENDING,
+//         },
+//         data: {
+//           status: RentalRequestStatus.REJECTED,
+//         },
+//       });
+//     }
+//     return updatedRequest;
+//   });
+// };
+// const updateRentalRequestStatus = async (
+//   rentalRequestId: string,
+//   landlordId: string,
+//   status: RentalRequestStatus,
+// ) => {
+//   const rentalRequest = await prisma.rentalRequest.findUnique({
+//     where: {
+//       id: rentalRequestId,
+//     },
+//     include: {
+//       property: true,
+//     },
+//   });
+//   if (!rentalRequest) {
+//     throw new Error("Rental request not found");
+//   }
+//   if (rentalRequest.property.authorId !== landlordId) {
+//     throw new Error("You are not authorized to update this rental request");
+//   }
+//   if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
+//     throw new Error("This rental request has already been processed");
+//   }
+// return await prisma.$transaction(async (tx) => {
+//   const paymentLink =
+//     status === RentalRequestStatus.APPROVED
+//       ? `http://localhost:5000/api/payments/${rentalRequestId}`
+//       : null;
+//   const updatedRequest = await tx.rentalRequest.update({
+//     where: {
+//       id: rentalRequestId,
+//     },
+//     data: {
+//       rentalstatus: status,
+//       paymentLink,
+//     },
+//   });
+//   if (status === RentalRequestStatus.APPROVED) {
+//     await tx.property.update({
+//       where: {
+//         id: rentalRequest.propertyId,
+//       },
+//       data: {
+//         status: PropertyStatus.UNAVAILABLE,
+//       },
+//     });
+//     await tx.rentalRequest.updateMany({
+//       where: {
+//         propertyId: rentalRequest.propertyId,
+//         id: {
+//           not: rentalRequestId,
+//         },
+//         rentalstatus: RentalRequestStatus.PENDING,
+//       },
+//       data: {
+//         rentalstatus: RentalRequestStatus.REJECTED,
+//       },
+//     });
+//   }
+//   return updatedRequest;
+// });
+// };
+const updateRentalRequestStatus = async (rentalRequestId, landlordId, status) => {
+    const rentalRequest = await prisma.rentalRequest.findUnique({
+        where: {
+            id: rentalRequestId,
+        },
+        include: {
+            property: true,
+        },
+    });
+    if (!rentalRequest) {
+        throw new Error("Rental request not found");
+    }
+    if (rentalRequest.property.authorId !== landlordId) {
+        throw new Error("You are not authorized to update this rental request");
+    }
+    if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
+        throw new Error("This rental request has already been processed");
+    }
+    return await prisma.$transaction(async (tx) => {
+        // Update current rental request
+        const updatedRequest = await tx.rentalRequest.update({
+            where: {
+                id: rentalRequestId,
+            },
+            data: {
+                rentalstatus: status,
+            },
+            include: {
+                property: true,
+                tenant: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                    },
+                }
+            },
+        });
+        // If approved
+        if (status === RentalRequestStatus.APPROVED) {
+            // Make property unavailable
+            await tx.property.update({
+                where: {
+                    id: rentalRequest.propertyId,
+                },
+                data: {
+                    status: PropertyStatus.UNAVAILABLE,
+                },
+            });
+            // Reject all other pending requests
+            await tx.rentalRequest.updateMany({
+                where: {
+                    propertyId: rentalRequest.propertyId,
+                    id: {
+                        not: rentalRequestId,
+                    },
+                    rentalstatus: RentalRequestStatus.PENDING,
+                },
+                data: {
+                    rentalstatus: RentalRequestStatus.REJECTED,
+                },
+            });
+            // Create Payment Record
+            await tx.payment.create({
+                data: {
+                    userId: rentalRequest.tenantId,
+                    rentalRequestId: rentalRequestId,
+                    amount: rentalRequest.property.price,
+                    status: PaymentStatus.PENDING,
+                    meta: {},
+                },
+            });
+        }
+        return updatedRequest;
+    });
+};
+// get landlord rental requests
+const getLandlordRentalRequests = async (landlordId) => {
+    return await prisma.rentalRequest.findMany({
+        where: {
+            property: {
+                authorId: landlordId,
+            },
+        },
+        include: {
+            property: true,
+            tenant: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    reviews: true
+                },
+            }
+        },
+    });
+};
+// delete property
 const deleteProperty = async (propertyId, authorId, userRole) => {
     // const property = await prisma.property.findUniqueOrThrow({
     //   where: {
@@ -210,6 +430,8 @@ export const propertyService = {
     getAdminProperties,
     getPropertyById,
     updateProperty,
+    updateRentalRequestStatus,
+    getLandlordRentalRequests,
     deleteProperty,
 };
 //# sourceMappingURL=property.service.js.map

@@ -3,5 +3,7 @@ export declare const userController: {
     register: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     getAllUsers: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     getProfile: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    updateUserStatus: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    userDelete: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 };
 //# sourceMappingURL=user.controller.d.ts.map

@@ -22,7 +22,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, World!");
+  res.send({
+    success: true,
+    statusCode: 200,
+    message: "welcome to RentNest Api Server 🚀",
+  });
 });
 
 app.use("/api/auth", userRouter);

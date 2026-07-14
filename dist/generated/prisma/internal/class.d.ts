@@ -11,8 +11,8 @@ export interface PrismaClientConstructor {
    * const prisma = new PrismaClient({
    *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
    * })
-   * // Fetch zero or more Profiles
-   * const profiles = await prisma.profile.findMany()
+   * // Fetch zero or more Payments
+   * const payments = await prisma.payment.findMany()
    * ```
    *
    * Read more in our [docs](https://pris.ly/d/client).
@@ -30,8 +30,8 @@ export interface PrismaClientConstructor {
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Profiles
- * const profiles = await prisma.profile.findMany()
+ * // Fetch zero or more Payments
+ * const payments = await prisma.payment.findMany()
  * ```
  *
  * Read more in our [docs](https://pris.ly/d/client).
@@ -118,13 +118,24 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         extArgs: ExtArgs;
     }>>;
     /**
- * `prisma.profile`: Exposes CRUD operations for the **Profile** model.
+ * `prisma.payment`: Exposes CRUD operations for the **Payment** model.
   * Example usage:
   * ```ts
-  * // Fetch zero or more Profiles
-  * const profiles = await prisma.profile.findMany()
+  * // Fetch zero or more Payments
+  * const payments = await prisma.payment.findMany()
   * ```
   */
+    get payment(): Prisma.PaymentDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.profile`: Exposes CRUD operations for the **Profile** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Profiles
+      * const profiles = await prisma.profile.findMany()
+      * ```
+      */
     get profile(): Prisma.ProfileDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;

@@ -67,6 +67,7 @@ export const JsonNull = runtime.JsonNull;
  */
 export const AnyNull = runtime.AnyNull;
 export const ModelName = {
+    Payment: 'Payment',
     Profile: 'Profile',
     Property: 'Property',
     RentalRequest: 'RentalRequest',
@@ -82,6 +83,17 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
     RepeatableRead: 'RepeatableRead',
     Serializable: 'Serializable'
 });
+export const PaymentScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    rentalRequestId: 'rentalRequestId',
+    amount: 'amount',
+    status: 'status',
+    transactionId: 'transactionId',
+    meta: 'meta',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
 export const ProfileScalarFieldEnum = {
     id: 'id',
     profilePhoto: 'profilePhoto',
@@ -110,7 +122,7 @@ export const RentalRequestScalarFieldEnum = {
     tenantId: 'tenantId',
     propertyId: 'propertyId',
     message: 'message',
-    status: 'status',
+    rentalstatus: 'rentalstatus',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
@@ -137,9 +149,17 @@ export const SortOrder = {
     asc: 'asc',
     desc: 'desc'
 };
+export const JsonNullValueInput = {
+    JsonNull: JsonNull
+};
 export const QueryMode = {
     default: 'default',
     insensitive: 'insensitive'
+};
+export const JsonNullValueFilter = {
+    DbNull: DbNull,
+    JsonNull: JsonNull,
+    AnyNull: AnyNull
 };
 export const NullsOrder = {
     first: 'first',
