@@ -6,6 +6,6 @@ import { Role } from "../../../generated/prisma/enums";
 const router = Router();
 
 // Create review (after completed rental)
-router.post("/reviews", auth(Role.TENANT), reviewController.createReview);
+router.post("/reviews", auth(Role.TENANT, Role.LANDLORD), reviewController.createReview);
 
 export const reviewRouter = router;

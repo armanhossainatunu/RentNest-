@@ -258,6 +258,7 @@ const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
 
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
+ 
     include: {
       rentalRequest: {
         include: {
@@ -274,7 +275,7 @@ const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
       },
     },
   });
-
+   console.log(payment?.amount, payment?.status, payment?.transactionId);
   if (!payment) {
     throw new Error("Payment record not found");
   }
@@ -292,7 +293,7 @@ const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: httpStatus.OK,
     message: "Payment details fetched successfully",
-    data: payment,
+    data:payment,
   });
 });
 

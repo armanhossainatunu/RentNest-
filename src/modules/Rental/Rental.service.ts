@@ -91,6 +91,7 @@ const getRentalRequestDetails = async (
           role: true,
         },
       },
+      payment: true,
       property: {
         include: {
           author: {

@@ -22,16 +22,7 @@ const createProperty = async (payload: propertyPayload, userId: string) => {
 
   return result;
 };
-// const createProperty = async (payload: propertyPayload, userId: string) => {
-  
-//   const result = await prisma.property.create({
-//     data: {
-//       ...payload,
-//       authorId: userId,
-//     },
-//   });
-//   return result;
-// };
+
 // get all properties
 const getAllProperties = async (query: Record<string, any>) => {
   const { location, category, minPrice, maxPrice } = query;
@@ -69,6 +60,17 @@ const getAllProperties = async (query: Record<string, any>) => {
           name: true,
           email: true,
           role: true,
+        },
+      },
+      rentalRequests: {
+        include: {
+          tenant: {
+            select: {
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
         },
       },
       reviews: true,
@@ -214,149 +216,7 @@ const updateProperty = async (
     data: updateData,
   });
 };
-// update Rental Request Status
-// const updateRentalRequestStatus = async (
-//   rentalRequestId: string,
-//   landlordId: string,
-//   status: RentalRequestStatus,
-// ) => {
-//   if (!rentalRequestId) {
-//     throw new Error("Rental request ID is required");
-//   }
 
-//   const rentalRequest = await prisma.rentalRequest.findUnique({
-//     where: {
-//       id: rentalRequestId,
-//     },
-//     include: {
-//       property: true,
-//     },
-//   });
-
-//   if (!rentalRequest) {
-//     throw new Error("Rental request not found");
-//   }
-
-//   if (rentalRequest.property.authorId !== landlordId) {
-//     throw new Error("You are not authorized to update this rental request");
-//   }
-
-//   if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
-//     throw new Error("This rental request has already been processed");
-//   }
-
-//   return await prisma.$transaction(async (tx) => {
-//     const updatedRequest = await tx.rentalRequest.update({
-//       where: {
-//         id: rentalRequestId,
-//       },
-//       data: {
-//         rentalstatus: status,
-//       },
-//     });
-
-//     if (status === RentalRequestStatus.APPROVED) {
-//       await tx.property.update({
-//         where: {
-//           id: rentalRequest.propertyId,
-//         },
-//         data: {
-//           status: PropertyStatus.UNAVAILABLE,
-//         },
-//       });
-
-//       await tx.rentalRequest.updateMany({
-//         where: {
-//           propertyId: rentalRequest.propertyId,
-//           id: {
-//             not: rentalRequestId,
-//           },
-//           status: RentalRequestStatus.PENDING,
-//         },
-//         data: {
-//           status: RentalRequestStatus.REJECTED,
-//         },
-//       });
-//     }
-
-//     return updatedRequest;
-//   });
-// };
-
-
-// const updateRentalRequestStatus = async (
-//   rentalRequestId: string,
-//   landlordId: string,
-//   status: RentalRequestStatus,
-// ) => {
-  
-//   const rentalRequest = await prisma.rentalRequest.findUnique({
-//     where: {
-//       id: rentalRequestId,
-//     },
-//     include: {
-//       property: true,
-//     },
-//   });
-
-//   if (!rentalRequest) {
-//     throw new Error("Rental request not found");
-//   }
-
-//   if (rentalRequest.property.authorId !== landlordId) {
-//     throw new Error("You are not authorized to update this rental request");
-//   }
-
-//   if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
-//     throw new Error("This rental request has already been processed");
-//   }
-
- 
-// return await prisma.$transaction(async (tx) => {
-//   const paymentLink =
-//     status === RentalRequestStatus.APPROVED
-//       ? `http://localhost:5000/api/payments/${rentalRequestId}`
-//       : null;
-
-//   const updatedRequest = await tx.rentalRequest.update({
-//     where: {
-//       id: rentalRequestId,
-//     },
-//     data: {
-//       rentalstatus: status,
-//       paymentLink,
-//     },
-//   });
-
-//   if (status === RentalRequestStatus.APPROVED) {
-//     await tx.property.update({
-//       where: {
-//         id: rentalRequest.propertyId,
-//       },
-//       data: {
-//         status: PropertyStatus.UNAVAILABLE,
-//       },
-//     });
-
-//     await tx.rentalRequest.updateMany({
-//       where: {
-//         propertyId: rentalRequest.propertyId,
-//         id: {
-//           not: rentalRequestId,
-//         },
-//         rentalstatus: RentalRequestStatus.PENDING,
-//       },
-//       data: {
-//         rentalstatus: RentalRequestStatus.REJECTED,
-//       },
-//     });
-//   }
-
-//   return updatedRequest;
-// });
-
-
-// };
 
 
 const updateRentalRequestStatus = async (
