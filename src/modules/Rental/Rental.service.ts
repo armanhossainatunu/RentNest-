@@ -39,11 +39,10 @@ const createRentalRequest = async (
     },
   });
   // const payment = paymentService.initializePayment(request.property, tenantId as any);
- 
 
   return {
     ...data,
-    payment: null
+    payment: null,
   };
 };
 
@@ -52,6 +51,7 @@ const getMyRentalRequests = async (tenantId: string) => {
     where: {
       tenantId,
     },
+
     include: {
       property: {
         include: {
@@ -64,7 +64,17 @@ const getMyRentalRequests = async (tenantId: string) => {
           },
         },
       },
+
+      payment: {
+        select: {
+          id: true,
+          amount: true,
+          status: true,
+          transactionId: true,
+        },
+      },
     },
+
     orderBy: {
       createdAt: "desc",
     },
@@ -72,7 +82,6 @@ const getMyRentalRequests = async (tenantId: string) => {
 
   return requests;
 };
-
 const getRentalRequestDetails = async (
   requestId: string,
   userId: string,

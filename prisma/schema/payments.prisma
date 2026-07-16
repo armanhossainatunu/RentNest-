@@ -5,7 +5,7 @@ model Payment {
     rentalRequestId String @unique
 
     amount Float
-    status PaymentStatus @default(PENDING)
+    status PaymentStatus @default(UNPAID)
 
     transactionId String?  @unique
     meta          Json

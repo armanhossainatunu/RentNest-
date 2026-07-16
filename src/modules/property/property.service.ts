@@ -62,17 +62,18 @@ const getAllProperties = async (query: Record<string, any>) => {
           role: true,
         },
       },
-      rentalRequests: {
-        include: {
-          tenant: {
-            select: {
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-        },
-      },
+      // rentalRequests: {
+      //   include: {
+      //     tenant: {
+      //       select: {
+      //         name: true,
+      //         email: true,
+      //         role: true,
+      //       },
+      //     },
+      //   },
+      // },
+      
       reviews: true,
     },
     orderBy: {

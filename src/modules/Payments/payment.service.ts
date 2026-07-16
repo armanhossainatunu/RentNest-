@@ -44,6 +44,7 @@ const initializePayment = async (
   );
 
   const data = response.data;
+  
   return data;
 };
 

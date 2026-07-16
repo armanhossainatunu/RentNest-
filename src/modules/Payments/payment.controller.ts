@@ -44,7 +44,7 @@ const createPaymentSession = catchAsync(
 
     // Check or create payment record
     let payment = await prisma.payment.findUnique({
-      where: { rentalRequestId },
+      where: {  rentalRequestId },
     });
 
     if (payment && payment.status === PaymentStatus.PAID) {
@@ -156,7 +156,7 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: `Payment status updated to ${finalStatus}`,
+    message: `Payment status suscessfully updated to ${finalStatus}`,
     data: updatedPayment,
   });
 });
@@ -172,22 +172,36 @@ const getPaymentHistory = catchAsync(async (req: Request, res: Response) => {
 
   let result;
 
+  const paymentSelect = {
+    id: true,
+    userId: true,
+    rentalRequestId: true,
+    amount: true,
+    status: true,
+    transactionId: true,
+    createdAt: true,
+    updatedAt: true,
+    
+
+    rentalRequest: {
+      include: {
+        property: true,
+      },
+    },
+
+    // user: {
+    //   select: {
+    //     id: true,
+    //     name: true,
+    //     email: true,
+    //     role: true,
+    //   },
+    // },
+  };
+
   if (role === Role.ADMIN) {
     result = await prisma.payment.findMany({
-      include: {
-        rentalRequest: {
-          include: {
-            property: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+      select: paymentSelect,
       orderBy: {
         createdAt: "desc",
       },
@@ -201,37 +215,18 @@ const getPaymentHistory = catchAsync(async (req: Request, res: Response) => {
           },
         },
       },
-      include: {
-        rentalRequest: {
-          include: {
-            property: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+      select: paymentSelect,
       orderBy: {
         createdAt: "desc",
       },
     });
   } else {
-    // Default to TENANT
+    // TENANT
     result = await prisma.payment.findMany({
       where: {
         userId,
       },
-      include: {
-        rentalRequest: {
-          include: {
-            property: true,
-          },
-        },
-      },
+      select: paymentSelect,
       orderBy: {
         createdAt: "desc",
       },
@@ -256,7 +251,7 @@ const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
     throw new Error("User not authenticated");
   }
 
-  const payment = await prisma.payment.findUnique({
+  let payment = await prisma.payment.findUnique({
     where: { id: paymentId },
  
     include: {
@@ -265,17 +260,17 @@ const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
           property: true,
         },
       },
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      },
+      // user: {
+      //   select: {
+      //     id: true,
+      //     name: true,
+      //     email: true,
+      //     role: true,
+      //   },
+      // },
     },
   });
-   console.log(payment?.amount, payment?.status, payment?.transactionId);
+   const paymentDetails =(payment?.amount, payment?.status, payment?.transactionId);
   if (!payment) {
     throw new Error("Payment record not found");
   }
@@ -293,7 +288,7 @@ const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: httpStatus.OK,
     message: "Payment details fetched successfully",
-    data:payment,
+    data: payment,
   });
 });
 
