@@ -34,7 +34,7 @@ router.put(
 // update Rental requests
 router.put(
   "/requests/:id",
-  auth(Role.LANDLORD),
+  auth(Role.LANDLORD , Role.ADMIN),
   propertyController.updateRentalRequestStatus,
 );
 // get landlord rental requests

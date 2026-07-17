@@ -16,8 +16,8 @@ const createProperty = catchAsync(
     const payload = req.body;
 
     if (payload.category) {
-        payload.category = payload.category.toUpperCase() as PropertyCategory;
-      }
+      payload.category = payload.category.toUpperCase() as PropertyCategory;
+    }
 
     const property = await propertyService.createProperty(
       payload,
@@ -35,7 +35,7 @@ const createProperty = catchAsync(
 // get all properties
 const getAllProperties = catchAsync(async (req, res) => {
   const result = await propertyService.getAllProperties(req.query);
- 
+
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -44,26 +44,27 @@ const getAllProperties = catchAsync(async (req, res) => {
   });
 });
 // get all property categories
-const getAllPropertyCategories = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
-  const result = await propertyService.getAllPropertyCategories();
+const getAllPropertyCategories = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await propertyService.getAllPropertyCategories();
 
- 
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.OK,
-    message: "Property categories retrieved successfully",
-    data: result,
-  });
-})
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Property categories retrieved successfully",
+      data: result,
+    });
+  },
+);
 // get property by id
 const getPropertyById = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const propertyId = req.params.id;
- 
+
     const property = await propertyService.getPropertyById(
       propertyId as string,
     );
-    
+
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -112,7 +113,6 @@ const updateProperty = catchAsync(
 //   const rentalRequestId = req.params.id;
 //   const landlordId = req.user?.userId;
 
-
 //   const status = req.body?.status?.toUpperCase();
 
 //   if (!status) {
@@ -145,8 +145,9 @@ const updateRentalRequestStatus = catchAsync(
 
     const result = await propertyService.updateRentalRequestStatus(
       rentalRequestId as string,
-      landlordId as string,
-      rentalstatus
+      req.user?.userId as string,
+      req.user?.role as Role,
+      rentalstatus,
     );
 
     sendResponse(res, {
@@ -155,21 +156,22 @@ const updateRentalRequestStatus = catchAsync(
       message: `Rental request ${rentalstatus.toLowerCase()} successfully`,
       data: result,
     });
-  }
+  },
 );
 
 // get landlord rental requests
-const  getLandlordRentalRequests = catchAsync(async (req, res) => {
+const getLandlordRentalRequests = catchAsync(async (req, res) => {
   const landlordId = req.user?.userId;
-  const result = await propertyService.getLandlordRentalRequests(landlordId as string);
+  const result = await propertyService.getLandlordRentalRequests(
+    landlordId as string,
+  );
   sendResponse(res, {
     success: true,
     statusCode: 200,
     message: "Rental requests retrieved successfully",
     data: result,
   });
-})
-
+});
 
 // delete property
 const deleteProperty = catchAsync(

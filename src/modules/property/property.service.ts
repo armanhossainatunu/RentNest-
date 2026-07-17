@@ -218,11 +218,11 @@ const updateProperty = async (
   });
 };
 
-
-
+// update rental request
 const updateRentalRequestStatus = async (
   rentalRequestId: string,
-  landlordId: string,
+  userId: string,
+  userRole: Role,
   status: RentalRequestStatus,
 ) => {
   const rentalRequest = await prisma.rentalRequest.findUnique({
@@ -238,8 +238,17 @@ const updateRentalRequestStatus = async (
     throw new Error("Rental request not found");
   }
 
-  if (rentalRequest.property.authorId !== landlordId) {
-    throw new Error("You are not authorized to update this rental request");
+  // Only property owner landlord OR admin can update
+  const isLandlordOwner =
+    userRole === Role.LANDLORD &&
+    rentalRequest.property.authorId === userId;
+
+  const isAdmin = userRole === Role.ADMIN;
+
+  if (!isLandlordOwner && !isAdmin) {
+    throw new Error(
+      "You are not authorized to update this rental request",
+    );
   }
 
   if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
@@ -247,7 +256,7 @@ const updateRentalRequestStatus = async (
   }
 
   return await prisma.$transaction(async (tx) => {
-    // Update current rental request
+    // Update rental request
     const updatedRequest = await tx.rentalRequest.update({
       where: {
         id: rentalRequestId,
@@ -264,7 +273,7 @@ const updateRentalRequestStatus = async (
             email: true,
             role: true,
           },
-        }
+        },
       },
     });
 
@@ -294,13 +303,13 @@ const updateRentalRequestStatus = async (
         },
       });
 
-      // Create Payment Record
+      // Create payment record
       await tx.payment.create({
         data: {
           userId: rentalRequest.tenantId,
           rentalRequestId: rentalRequestId,
           amount: rentalRequest.property.price,
-          status: PaymentStatus.PENDING,
+          status: PaymentStatus.UNPAID,
           meta: {},
         },
       });
@@ -319,6 +328,14 @@ const  getLandlordRentalRequests = async (landlordId: string) => {
       },
     },
     include: {
+      payment: {
+        select: {
+          id: true,
+          amount: true,
+          status: true,
+          transactionId: true,
+        },
+      },
       property: true,
       tenant:{
         select: {

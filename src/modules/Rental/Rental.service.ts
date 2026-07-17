@@ -45,7 +45,7 @@ const createRentalRequest = async (
     payment: null,
   };
 };
-
+// get my rental requests
 const getMyRentalRequests = async (tenantId: string) => {
   const requests = await prisma.rentalRequest.findMany({
     where: {
@@ -82,6 +82,7 @@ const getMyRentalRequests = async (tenantId: string) => {
 
   return requests;
 };
+// get rental request details
 const getRentalRequestDetails = async (
   requestId: string,
   userId: string,
@@ -137,10 +138,18 @@ const getRentalRequestDetails = async (
 
   throw new Error("You are not authorized to view this rental request");
 };
-
+//Admin get all rental requests
 const getAllRentalRequests = async () => {
   return prisma.rentalRequest.findMany({
     include: {
+        payment: {
+        select: {
+          id: true,
+          amount: true,
+          status: true,
+          transactionId: true,
+        },
+      },
       property: {
         include: {
           author: {
@@ -152,6 +161,7 @@ const getAllRentalRequests = async () => {
           },
         },
       },
+    
     },
     orderBy: {
       createdAt: "desc",

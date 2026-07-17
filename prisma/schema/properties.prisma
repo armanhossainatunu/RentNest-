@@ -8,9 +8,6 @@ model Property {
   authorId    String
   author      User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
   location    String
-  bedrooms    Int?
-  bathrooms   Int?
-  balconies   Int?
   category    PropertyCategory @default(APARTMENT)
   views       Int              @default(0)
   createdAt   DateTime         @default(now())

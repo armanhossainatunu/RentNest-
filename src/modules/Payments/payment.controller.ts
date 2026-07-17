@@ -65,7 +65,7 @@ const createPaymentSession = catchAsync(
           userId: rentalRequest.tenantId,
           rentalRequestId: rentalRequestId,
           amount: rentalRequest.property.price,
-          status: PaymentStatus.PENDING,
+          status: PaymentStatus.UNPAID,
           transactionId,
           meta: {},
         },
@@ -75,7 +75,7 @@ const createPaymentSession = catchAsync(
         where: { id: payment.id },
         data: {
           transactionId,
-          status: PaymentStatus.PENDING,
+          status: PaymentStatus.UNPAID,
         },
       });
     }
@@ -96,6 +96,7 @@ const createPaymentSession = catchAsync(
         message: "Gateway URL not returned by payment provider",
         data: initResp,
       });
+
       return;
     }
 
@@ -119,7 +120,7 @@ const createPaymentSession = catchAsync(
 // POST /api/payments/confirm
 const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
-  const { tran_id, status } = payload || {};
+  const { tran_id, status} = payload || {};
 
   console.log("SSLCommerz callback received. Status:", status, "Transaction ID:", tran_id);
 
@@ -135,7 +136,7 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
     throw new Error("Payment record not found for transaction ID: " + tran_id);
   }
 
-  let finalStatus: PaymentStatus = PaymentStatus.PENDING;
+  let finalStatus: PaymentStatus = PaymentStatus.UNPAID;
 
   if (status === "VALID" || status === "VALIDATED") {
     finalStatus = PaymentStatus.PAID;
@@ -152,7 +153,7 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
       meta: payload || {},
     },
   });
-
+console.log(updatedPayment);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
