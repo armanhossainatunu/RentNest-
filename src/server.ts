@@ -1,20 +1,39 @@
 import app from "./app";
-import { config } from "./config";
 import { prisma } from "./lib/prisma";
-const PORT = config.port ;
 
-async function main() {
-  try {
+let isPrismaConnected = false;
+
+async function ensureDatabaseConnection() {
+  if (!isPrismaConnected) {
     await prisma.$connect();
+    isPrismaConnected = true;
     console.log("Connected to the database successfully.");
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Error starting server:", error);
-    await prisma.$disconnect();
-    process.exit(1);
   }
 }
 
-main();
+export async function handler(req: any, res: any) {
+  try {
+    await ensureDatabaseConnection();
+  } catch (error) {
+    console.error("Prisma connection failed:", error);
+  }
+
+  return app(req, res);
+}
+
+if (!process.env.VERCEL) {
+  const PORT = Number(process.env.PORT || 5000);
+
+  ensureDatabaseConnection()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error("Error starting server:", error);
+      process.exit(1);
+    });
+}
+
+export default handler;

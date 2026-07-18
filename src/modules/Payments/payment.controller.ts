@@ -122,7 +122,7 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
   const { tran_id, status} = payload || {};
 
-  console.log("SSLCommerz callback received. Status:", status, "Transaction ID:", tran_id);
+  // console.log("SSLCommerz callback received. Status:", status, "Transaction ID:", tran_id);
 
   if (!tran_id) {
     throw new Error("Transaction ID is missing in callback payload");
