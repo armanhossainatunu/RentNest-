@@ -1171,10 +1171,14 @@ var createPaymentSession = catchAsync(
       throw new Error("User not authenticated");
     }
     if (rentalRequest.tenantId !== userId) {
-      throw new Error("You are not authorized to make payment for this rental request");
+      throw new Error(
+        "You are not authorized to make payment for this rental request"
+      );
     }
     if (rentalRequest.rentalstatus !== RentalRequestStatus.APPROVED) {
-      throw new Error("Payment can only be initiated for approved rental requests");
+      throw new Error(
+        "Payment can only be initiated for approved rental requests"
+      );
     }
     let payment = await prisma.payment.findUnique({
       where: { rentalRequestId }
@@ -1241,7 +1245,6 @@ var createPaymentSession = catchAsync(
 var confirmPayment = catchAsync(async (req, res) => {
   const payload = req.body;
   const { tran_id, status } = payload || {};
-  console.log("SSLCommerz callback received. Status:", status, "Transaction ID:", tran_id);
   if (!tran_id) {
     throw new Error("Transaction ID is missing in callback payload");
   }
@@ -1266,6 +1269,7 @@ var confirmPayment = catchAsync(async (req, res) => {
       meta: payload || {}
     }
   });
+  console.log(updatedPayment);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus7.OK,
@@ -1394,7 +1398,7 @@ var paymentController = {
 // src/modules/Payments/payment.route.ts
 var route = Router5();
 route.post("/create", auth_default(Role.TENANT), paymentController.createPaymentSession);
-route.post("/confirm", auth_default(Role.LANDLORD, Role.ADMIN), paymentController.confirmPayment);
+route.post("/confirm", paymentController.confirmPayment);
 route.get("/", auth_default(Role.TENANT, Role.LANDLORD, Role.ADMIN), paymentController.getPaymentHistory);
 route.get("/:id", auth_default(Role.TENANT, Role.LANDLORD, Role.ADMIN), paymentController.getPaymentDetails);
 var paymentRouter = route;
@@ -1635,11 +1639,24 @@ router5.get(
 );
 var rentalRouter = router5;
 
+// src/middlewares/globalErrorHandling.ts
+var globalErrorHandling = (err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal Server Error"
+  });
+};
+var globalErrorHandling_default = globalErrorHandling;
+
 // src/app.ts
 var app = express();
 app.use(
   cors({
-    origin: "http://localhost:5000",
+    origin: [
+      "http://localhost:3000",
+      "https://rent-nest-ten.vercel.app"
+    ],
     credentials: true
   })
 );
@@ -1661,22 +1678,40 @@ app.use("/api/", propertyRouter);
 app.use("/api", rentalRouter);
 app.use("/api/", reviewRouter);
 app.use("/api/payments", paymentRouter);
+app.use(globalErrorHandling_default);
 var app_default = app;
 
 // src/server.ts
-var PORT = config2.port;
-async function main() {
-  try {
+var isPrismaConnected = false;
+async function ensureDatabaseConnection() {
+  if (!isPrismaConnected) {
     await prisma.$connect();
+    isPrismaConnected = true;
     console.log("Connected to the database successfully.");
+  }
+}
+async function handler(req, res) {
+  try {
+    await ensureDatabaseConnection();
+  } catch (error) {
+    console.error("Prisma connection failed:", error);
+  }
+  return app_default(req, res);
+}
+if (!process.env.VERCEL) {
+  const PORT = Number(process.env.PORT || 5e3);
+  ensureDatabaseConnection().then(() => {
     app_default.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
-  } catch (error) {
+  }).catch((error) => {
     console.error("Error starting server:", error);
-    await prisma.$disconnect();
     process.exit(1);
-  }
+  });
 }
-main();
+var server_default = handler;
+export {
+  server_default as default,
+  handler
+};
 //# sourceMappingURL=server.js.map

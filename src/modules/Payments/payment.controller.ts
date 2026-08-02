@@ -4,7 +4,11 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { paymentService } from "./payment.service";
-import { PaymentStatus, RentalRequestStatus, Role } from "../../../generated/prisma/client";
+import {
+  PaymentStatus,
+  RentalRequestStatus,
+  Role,
+} from "../../../generated/prisma/client";
 
 // POST /api/payments/create
 const createPaymentSession = catchAsync(
@@ -34,17 +38,21 @@ const createPaymentSession = catchAsync(
 
     // Verify authorized tenant
     if (rentalRequest.tenantId !== userId) {
-      throw new Error("You are not authorized to make payment for this rental request");
+      throw new Error(
+        "You are not authorized to make payment for this rental request",
+      );
     }
 
     // Verify rental request status is APPROVED
     if (rentalRequest.rentalstatus !== RentalRequestStatus.APPROVED) {
-      throw new Error("Payment can only be initiated for approved rental requests");
+      throw new Error(
+        "Payment can only be initiated for approved rental requests",
+      );
     }
 
     // Check or create payment record
     let payment = await prisma.payment.findUnique({
-      where: {  rentalRequestId },
+      where: { rentalRequestId },
     });
 
     if (payment && payment.status === PaymentStatus.PAID) {
@@ -83,7 +91,7 @@ const createPaymentSession = catchAsync(
     const initResp = await paymentService.initializePayment(
       rentalRequest.property,
       rentalRequest.tenant,
-      transactionId
+      transactionId,
     );
 
     const gatewayUrl =
@@ -114,22 +122,67 @@ const createPaymentSession = catchAsync(
       message: "Please proceed to Payment",
       data: { gatewayUrl },
     });
-  }
+  },
 );
 
 // POST /api/payments/confirm
+// const confirmPayment = catchAsync(async (req: Request, res: Response) => {
+//   const payload = req.body;
+//   const { tran_id, status } = payload || {};
+
+//   // console.log("SSLCommerz callback received. Status:", status, "Transaction ID:", tran_id);
+
+//   if (!tran_id) {
+//     throw new Error("Transaction ID is missing in callback payload");
+//   }
+
+//   const payment = await prisma.payment.findUnique({
+//     where: { transactionId: tran_id },
+//   });
+
+//   if (!payment) {
+//     throw new Error("Payment record not found for transaction ID: " + tran_id);
+//   }
+
+//   let finalStatus: PaymentStatus = PaymentStatus.UNPAID;
+
+//   if (status === "VALID" || status === "VALIDATED") {
+//     finalStatus = PaymentStatus.PAID;
+//   } else if (status === "FAILED") {
+//     finalStatus = PaymentStatus.FAILED;
+//   } else if (status === "CANCELLED") {
+//     finalStatus = PaymentStatus.CANCELLED;
+//   }
+
+//   const updatedPayment = await prisma.payment.update({
+//     where: { id: payment.id },
+//     data: {
+//       status: finalStatus,
+//       meta: payload || {},
+//     },
+//   });
+//   console.log(updatedPayment);
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: httpStatus.OK,
+//     message: `Payment status suscessfully updated to ${finalStatus}`,
+//     data: updatedPayment,
+//   });
+// });
+
 const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
-  const { tran_id, status} = payload || {};
 
-  // console.log("SSLCommerz callback received. Status:", status, "Transaction ID:", tran_id);
+  const { tran_id, status } = payload || {};
 
   if (!tran_id) {
     throw new Error("Transaction ID is missing in callback payload");
   }
 
   const payment = await prisma.payment.findUnique({
-    where: { transactionId: tran_id },
+    where: {
+      transactionId: tran_id,
+    },
   });
 
   if (!payment) {
@@ -147,19 +200,25 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   }
 
   const updatedPayment = await prisma.payment.update({
-    where: { id: payment.id },
+    where: {
+      id: payment.id,
+    },
+
     data: {
       status: finalStatus,
       meta: payload || {},
     },
   });
-console.log(updatedPayment);
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.OK,
-    message: `Payment status suscessfully updated to ${finalStatus}`,
-    data: updatedPayment,
-  });
+
+  // console.log("Updated Payment:", updatedPayment);
+
+  // Redirect user to frontend page
+
+  if (finalStatus === PaymentStatus.PAID) {
+    return res.redirect(`${process.env.FRONTEND_URL}/payment/success`);
+  }
+
+  return res.redirect(`${process.env.FRONTEND_URL}/payment/cancel`);
 });
 
 // GET /api/payments
@@ -182,7 +241,6 @@ const getPaymentHistory = catchAsync(async (req: Request, res: Response) => {
     transactionId: true,
     createdAt: true,
     updatedAt: true,
-    
 
     rentalRequest: {
       include: {
@@ -254,7 +312,7 @@ const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
 
   let payment = await prisma.payment.findUnique({
     where: { id: paymentId },
- 
+
     include: {
       rentalRequest: {
         include: {
@@ -271,14 +329,16 @@ const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
       // },
     },
   });
-   const paymentDetails =(payment?.amount, payment?.status, payment?.transactionId);
+  const paymentDetails =
+    (payment?.amount, payment?.status, payment?.transactionId);
   if (!payment) {
     throw new Error("Payment record not found");
   }
 
   // Check authorization
   const isOwner = payment.userId === userId;
-  const isLandlordOfProperty = payment.rentalRequest.property.authorId === userId;
+  const isLandlordOfProperty =
+    payment.rentalRequest.property.authorId === userId;
   const isAdmin = role === Role.ADMIN;
 
   if (!isOwner && !isLandlordOfProperty && !isAdmin) {
