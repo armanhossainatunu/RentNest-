@@ -6,13 +6,11 @@ import {
   Role,
   PaymentStatus,
 } from "../../../generated/prisma/client";
-import { prisma } from "../../lib/prisma";;
+import { prisma } from "../../lib/prisma";
 import { propertyPayload, propertyUpdatePayload } from "./property.interface";
 
 // create property
 const createProperty = async (payload: propertyPayload, userId: string) => {
-
-  
   const result = await prisma.property.create({
     data: {
       ...payload,
@@ -73,7 +71,7 @@ const getAllProperties = async (query: Record<string, any>) => {
       //     },
       //   },
       // },
-      
+
       reviews: true,
     },
     orderBy: {
@@ -143,10 +141,7 @@ const getAllPropertyCategories = async () => {
   });
 
   if (result.length === 0) {
-    throw new Error(
-    
-      "Property categories not found"
-    );
+    throw new Error("Property categories not found");
   }
 
   return result.map((item) => item.category);
@@ -240,15 +235,12 @@ const updateRentalRequestStatus = async (
 
   // Only property owner landlord OR admin can update
   const isLandlordOwner =
-    userRole === Role.LANDLORD &&
-    rentalRequest.property.authorId === userId;
+    userRole === Role.LANDLORD && rentalRequest.property.authorId === userId;
 
   const isAdmin = userRole === Role.ADMIN;
 
   if (!isLandlordOwner && !isAdmin) {
-    throw new Error(
-      "You are not authorized to update this rental request",
-    );
+    throw new Error("You are not authorized to update this rental request");
   }
 
   if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
@@ -320,7 +312,7 @@ const updateRentalRequestStatus = async (
 };
 
 // get landlord rental requests
-const  getLandlordRentalRequests = async (landlordId: string) => {
+const getLandlordRentalRequests = async (landlordId: string) => {
   return await prisma.rentalRequest.findMany({
     where: {
       property: {
@@ -337,19 +329,18 @@ const  getLandlordRentalRequests = async (landlordId: string) => {
         },
       },
       property: true,
-      tenant:{
+      tenant: {
         select: {
           id: true,
           name: true,
           email: true,
           role: true,
-          reviews: true
+          reviews: true,
         },
-      }
+      },
     },
   });
-}
-
+};
 
 // delete property
 const deleteProperty = async (

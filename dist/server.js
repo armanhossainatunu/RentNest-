@@ -29,10 +29,10 @@ import { fileURLToPath } from "url";
 import * as runtime from "@prisma/client/runtime/client";
 var config = {
   "previewFeatures": [],
-  "clientVersion": "7.8.0",
-  "engineVersion": "3c6e192761c0362d496ed980de936e2f3cebcd3a",
+  "clientVersion": "7.9.1",
+  "engineVersion": "e922089b7d7502aff4249d5da3420f6fa55fc6ad",
   "activeProvider": "postgresql",
-  "inlineSchema": 'enum Role {\n  TENANT\n  LANDLORD\n  ADMIN\n}\n\nenum Status {\n  ACTIVE\n  BANNED\n}\n\nenum RentalRequestStatus {\n  PENDING\n  APPROVED\n  REJECTED\n}\n\nenum PaymentStatus {\n  UNPAID\n  PAID\n  FAILED\n  CANCELLED\n}\n\nenum PropertyStatus {\n  AVAILABLE\n  UNAVAILABLE\n}\n\nenum PropertyCategory {\n  APARTMENT\n  HOUSE\n  VILLA\n  DUPLEX\n  STUDIO\n  OFFICE\n  COMMERCIAL\n  SHOP\n}\n\nmodel Payment {\n  id String @id @default(uuid())\n\n  userId          String\n  rentalRequestId String @unique\n\n  amount Float\n  status PaymentStatus @default(UNPAID)\n\n  transactionId String?  @unique\n  meta          Json\n  createdAt     DateTime @default(now())\n  updatedAt     DateTime @updatedAt\n\n  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)\n  rentalRequest RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)\n\n  @@map("payments")\n}\n\nmodel Profile {\n  id           String  @id @default(uuid())\n  profilePhoto String?\n  bio          String?\n  userId       String  @unique\n  user         User    @relation(fields: [userId], references: [id])\n\n  @@map("profiles")\n}\n\nmodel Property {\n  id             String           @id @default(uuid())\n  title          String           @db.VarChar(255)\n  thumbnail      String?\n  description    String           @db.Text\n  price          Float\n  status         PropertyStatus   @default(AVAILABLE)\n  authorId       String\n  author         User             @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  location       String\n  category       PropertyCategory @default(APARTMENT)\n  views          Int              @default(0)\n  createdAt      DateTime         @default(now())\n  updatedAt      DateTime         @updatedAt\n  reviews        Review[]\n  rentalRequests RentalRequest[]\n\n  @@index([authorId])\n  @@map("properties")\n}\n\nmodel RentalRequest {\n  id String @id @default(uuid())\n\n  tenantId   String\n  propertyId String\n\n  message      String?\n  rentalstatus RentalRequestStatus @default(PENDING)\n\n  payment Payment?\n\n  tenant   User     @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel Review {\n  id         String   @id @default(uuid())\n  propertyId String\n  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)\n  authorId   String\n  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  rating     Float\n  comment    String\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  @@index([propertyId])\n  @@index([authorId])\n  @@map("reviews")\n}\n\n// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Get a free hosted Postgres database in seconds: `npx create-db`\n\ngenerator client {\n  provider = "prisma-client"\n  output   = "../../generated/prisma"\n}\n\ndatasource db {\n  provider = "postgresql"\n}\n\nmodel User {\n  id             String          @id @default(uuid())\n  name           String          @db.VarChar(255)\n  email          String          @unique\n  password       String\n  status         Status          @default(ACTIVE)\n  role           Role\n  createdAt      DateTime        @default(now())\n  updatedAt      DateTime        @updatedAt\n  profile        Profile?\n  properties     Property[]\n  reviews        Review[]\n  rentalRequests RentalRequest[]\n  payments       Payment[]\n\n  @@map("users")\n}\n',
+  "inlineSchema": 'enum Role {\n  TENANT\n  LANDLORD\n  ADMIN\n}\n\nenum Status {\n  ACTIVE\n  BANNED\n}\n\nenum RentalRequestStatus {\n  PENDING\n  APPROVED\n  REJECTED\n  ACTIVE\n  COMPLETED\n}\n\nenum PaymentStatus {\n  UNPAID\n  PAID\n  FAILED\n  CANCELLED\n}\n\nenum PropertyStatus {\n  AVAILABLE\n  UNAVAILABLE\n}\n\nenum PropertyCategory {\n  APARTMENT\n  HOUSE\n  VILLA\n  DUPLEX\n  STUDIO\n  OFFICE\n  COMMERCIAL\n  SHOP\n}\n\nmodel Payment {\n  id String @id @default(uuid())\n\n  userId          String\n  rentalRequestId String @unique\n\n  amount Float\n  status PaymentStatus @default(UNPAID)\n\n  transactionId String?  @unique\n  meta          Json\n  createdAt     DateTime @default(now())\n  updatedAt     DateTime @updatedAt\n\n  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)\n  rentalRequest RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)\n\n  @@map("payments")\n}\n\nmodel Profile {\n  id           String  @id @default(uuid())\n  profilePhoto String?\n  bio          String?\n  userId       String  @unique\n  user         User    @relation(fields: [userId], references: [id])\n\n  @@map("profiles")\n}\n\nmodel Property {\n  id             String           @id @default(uuid())\n  title          String           @db.VarChar(255)\n  thumbnail      String?\n  description    String           @db.Text\n  price          Float\n  status         PropertyStatus   @default(AVAILABLE)\n  authorId       String\n  author         User             @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  location       String\n  category       PropertyCategory @default(APARTMENT)\n  views          Int              @default(0)\n  createdAt      DateTime         @default(now())\n  updatedAt      DateTime         @updatedAt\n  reviews        Review[]\n  rentalRequests RentalRequest[]\n\n  @@index([authorId])\n  @@map("properties")\n}\n\nmodel RentalRequest {\n  id String @id @default(uuid())\n\n  tenantId   String\n  propertyId String\n\n  message      String?\n  rentalstatus RentalRequestStatus @default(PENDING)\n\n  payment Payment?\n\n  tenant   User     @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel Review {\n  id         String   @id @default(uuid())\n  propertyId String\n  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)\n  authorId   String\n  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  rating     Float\n  comment    String\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  @@index([propertyId])\n  @@index([authorId])\n  @@map("reviews")\n}\n\n// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Get a free hosted Postgres database in seconds: `npx create-db`\n\ngenerator client {\n  provider = "prisma-client"\n  output   = "../../generated/prisma"\n}\n\ndatasource db {\n  provider = "postgresql"\n}\n\nmodel User {\n  id             String          @id @default(uuid())\n  name           String          @db.VarChar(255)\n  email          String          @unique\n  password       String\n  status         Status          @default(ACTIVE)\n  role           Role\n  createdAt      DateTime        @default(now())\n  updatedAt      DateTime        @updatedAt\n  profile        Profile?\n  properties     Property[]\n  reviews        Review[]\n  rentalRequests RentalRequest[]\n  payments       Payment[]\n\n  @@map("users")\n}\n',
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -90,7 +90,9 @@ var Role = {
 var RentalRequestStatus = {
   PENDING: "PENDING",
   APPROVED: "APPROVED",
-  REJECTED: "REJECTED"
+  REJECTED: "REJECTED",
+  ACTIVE: "ACTIVE",
+  COMPLETED: "COMPLETED"
 };
 var PaymentStatus = {
   UNPAID: "UNPAID",
@@ -635,9 +637,7 @@ var getAllPropertyCategories = async () => {
     distinct: ["category"]
   });
   if (result.length === 0) {
-    throw new Error(
-      "Property categories not found"
-    );
+    throw new Error("Property categories not found");
   }
   return result.map((item) => item.category);
 };
@@ -712,9 +712,7 @@ var updateRentalRequestStatus = async (rentalRequestId, userId, userRole, status
   const isLandlordOwner = userRole === Role.LANDLORD && rentalRequest.property.authorId === userId;
   const isAdmin = userRole === Role.ADMIN;
   if (!isLandlordOwner && !isAdmin) {
-    throw new Error(
-      "You are not authorized to update this rental request"
-    );
+    throw new Error("You are not authorized to update this rental request");
   }
   if (rentalRequest.rentalstatus !== RentalRequestStatus.PENDING) {
     throw new Error("This rental request has already been processed");
@@ -1249,7 +1247,9 @@ var confirmPayment = catchAsync(async (req, res) => {
     throw new Error("Transaction ID is missing in callback payload");
   }
   const payment = await prisma.payment.findUnique({
-    where: { transactionId: tran_id }
+    where: {
+      transactionId: tran_id
+    }
   });
   if (!payment) {
     throw new Error("Payment record not found for transaction ID: " + tran_id);
@@ -1263,19 +1263,38 @@ var confirmPayment = catchAsync(async (req, res) => {
     finalStatus = PaymentStatus.CANCELLED;
   }
   const updatedPayment = await prisma.payment.update({
-    where: { id: payment.id },
+    where: {
+      id: payment.id
+    },
     data: {
       status: finalStatus,
       meta: payload || {}
     }
   });
-  console.log(updatedPayment);
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus7.OK,
-    message: `Payment status suscessfully updated to ${finalStatus}`,
-    data: updatedPayment
-  });
+  if (finalStatus === PaymentStatus.PAID) {
+    await prisma.rentalRequest.update({
+      where: {
+        id: payment.rentalRequestId
+      },
+      data: {
+        rentalstatus: RentalRequestStatus.ACTIVE
+      }
+    });
+  }
+  if (finalStatus === PaymentStatus.PAID) {
+    await prisma.rentalRequest.update({
+      where: {
+        id: payment.rentalRequestId
+      },
+      data: {
+        rentalstatus: RentalRequestStatus.ACTIVE
+      }
+    });
+  }
+  if (finalStatus === PaymentStatus.PAID) {
+    return res.redirect(`${process.env.FRONTEND_URL}/payment/success`);
+  }
+  return res.redirect(`${process.env.FRONTEND_URL}/payment/cancel`);
 });
 var getPaymentHistory = catchAsync(async (req, res) => {
   const userId = req.user?.userId;
@@ -1654,8 +1673,7 @@ var app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",
-      "https://rent-nest-ten.vercel.app"
+      "http://localhost:3000"
     ],
     credentials: true
   })

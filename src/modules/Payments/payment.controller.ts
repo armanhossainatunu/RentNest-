@@ -126,49 +126,7 @@ const createPaymentSession = catchAsync(
 );
 
 // POST /api/payments/confirm
-// const confirmPayment = catchAsync(async (req: Request, res: Response) => {
-//   const payload = req.body;
-//   const { tran_id, status } = payload || {};
-
-//   // console.log("SSLCommerz callback received. Status:", status, "Transaction ID:", tran_id);
-
-//   if (!tran_id) {
-//     throw new Error("Transaction ID is missing in callback payload");
-//   }
-
-//   const payment = await prisma.payment.findUnique({
-//     where: { transactionId: tran_id },
-//   });
-
-//   if (!payment) {
-//     throw new Error("Payment record not found for transaction ID: " + tran_id);
-//   }
-
-//   let finalStatus: PaymentStatus = PaymentStatus.UNPAID;
-
-//   if (status === "VALID" || status === "VALIDATED") {
-//     finalStatus = PaymentStatus.PAID;
-//   } else if (status === "FAILED") {
-//     finalStatus = PaymentStatus.FAILED;
-//   } else if (status === "CANCELLED") {
-//     finalStatus = PaymentStatus.CANCELLED;
-//   }
-
-//   const updatedPayment = await prisma.payment.update({
-//     where: { id: payment.id },
-//     data: {
-//       status: finalStatus,
-//       meta: payload || {},
-//     },
-//   });
-//   console.log(updatedPayment);
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: httpStatus.OK,
-//     message: `Payment status suscessfully updated to ${finalStatus}`,
-//     data: updatedPayment,
-//   });
-// });
+// POST /api/payments/confirm
 
 const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -199,20 +157,46 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
     finalStatus = PaymentStatus.CANCELLED;
   }
 
+  // Update Payment Status
+
+  // Update Payment Status
   const updatedPayment = await prisma.payment.update({
     where: {
       id: payment.id,
     },
-
     data: {
       status: finalStatus,
       meta: payload || {},
     },
   });
 
-  // console.log("Updated Payment:", updatedPayment);
+  // Payment PAID হলে Rental Request ACTIVE হবে
+  if (finalStatus === PaymentStatus.PAID) {
+    await prisma.rentalRequest.update({
+      where: {
+        id: payment.rentalRequestId,
+      },
+      data: {
+        rentalstatus: RentalRequestStatus.ACTIVE,
+      },
+    });
+  }
+  // ===============================
+  // Payment PAID হলে Rental ACTIVE
+  // ===============================
+  // Payment PAID হলে Rental Request ACTIVE হবে
+if (finalStatus === PaymentStatus.PAID) {
+  await prisma.rentalRequest.update({
+    where: {
+      id: payment.rentalRequestId,
+    },
+    data: {
+      rentalstatus: RentalRequestStatus.ACTIVE,
+    },
+  });
+}
 
-  // Redirect user to frontend page
+  // Frontend redirect
 
   if (finalStatus === PaymentStatus.PAID) {
     return res.redirect(`${process.env.FRONTEND_URL}/payment/success`);
