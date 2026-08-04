@@ -1,52 +1,83 @@
-import { PaymentStatus, RentalRequestStatus } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 
-const createReview = async (payload: {
+interface CreateReviewPayload {
   propertyId: string;
   authorId: string;
   rating: number;
   comment: string;
-}) => {
-  const { propertyId, authorId, rating, comment } = payload;
+}
 
-  // 1. Verify property exists
-  const propertyExists = await prisma.property.findUnique({
-    where: { id: propertyId },
+const createReview = async ({
+  propertyId,
+  authorId,
+  rating,
+  comment,
+}: CreateReviewPayload) => {
+  // Check property exists
+  const property = await prisma.property.findUnique({
+    where: {
+      id: propertyId,
+    },
   });
 
-  if (!propertyExists) {
+  if (!property) {
     throw new Error("Property not found");
   }
 
-  // 2. Verify tenant has a completed and paid rental for this property
+  // Check completed rental
   const completedRental = await prisma.rentalRequest.findFirst({
     where: {
       propertyId,
       tenantId: authorId,
-      rentalstatus: RentalRequestStatus.APPROVED,
-      payment: {
-        status: PaymentStatus.PAID,
-      },
+      rentalstatus: "COMPLETED",
     },
   });
 
   if (!completedRental) {
-    throw new Error("You can only review a property after completing and paying for the rental");
+    throw new Error(
+      "You can only review a property after completing the rental.",
+    );
   }
 
-  // 3. Create the review
-  const review = await prisma.review.create({
+  // Prevent duplicate review
+  const existingReview = await prisma.review.findFirst({
+    where: {
+      propertyId,
+      authorId,
+    },
+  });
+
+  if (existingReview) {
+    throw new Error("You have already reviewed this property.");
+  }
+
+  // Create review
+  return await prisma.review.create({
     data: {
       propertyId,
       authorId,
       rating,
       comment,
     },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      property: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+    },
   });
-
-  return review;
 };
 
 export const reviewService = {
   createReview,
 };
+
+export type { CreateReviewPayload };

@@ -71,6 +71,7 @@ const getMyRentalRequests = async (tenantId: string) => {
           amount: true,
           status: true,
           transactionId: true,
+          createdAt : true
         },
       },
     },

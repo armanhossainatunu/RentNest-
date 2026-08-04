@@ -19,6 +19,8 @@ const initializePayment = async (
   const baseAppUrl = config.app_url
     ? String(config.app_url).replace(/\/$/, "")
     : "";
+
+    console.log(baseAppUrl," baseAppUrl by payment service");
   form.append("success_url", `${baseAppUrl}/api/payments/confirm`);
   form.append("fail_url", `${baseAppUrl}/api/payments/confirm`);
   form.append("cancel_url", `${baseAppUrl}/api/payments/confirm`);

@@ -158,8 +158,6 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   }
 
   // Update Payment Status
-
-  // Update Payment Status
   const updatedPayment = await prisma.payment.update({
     where: {
       id: payment.id,
@@ -184,17 +182,16 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   // ===============================
   // Payment PAID হলে Rental ACTIVE
   // ===============================
-  // Payment PAID হলে Rental Request ACTIVE হবে
-if (finalStatus === PaymentStatus.PAID) {
-  await prisma.rentalRequest.update({
-    where: {
-      id: payment.rentalRequestId,
-    },
-    data: {
-      rentalstatus: RentalRequestStatus.ACTIVE,
-    },
-  });
-}
+  if (finalStatus === PaymentStatus.PAID) {
+    await prisma.rentalRequest.update({
+      where: {
+        id: payment.rentalRequestId,
+      },
+      data: {
+        rentalstatus: RentalRequestStatus.ACTIVE,
+      },
+    });
+  }
 
   // Frontend redirect
 
