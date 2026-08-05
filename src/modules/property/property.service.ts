@@ -84,6 +84,53 @@ const getAllProperties = async (query: Record<string, any>) => {
   return result;
 };
 // get property by id
+// const getPropertyById = async (propertyId: string) => {
+//   const transactionResult = await prisma.$transaction(async (tx) => {
+//     // Check property exists
+//     const property = await tx.property.findUnique({
+//       where: {
+//         id: propertyId,
+//       },
+//     });
+
+//     if (!property) {
+//       throw new Error("Property not found");
+//     }
+
+//     // Increment views
+//     await tx.property.update({
+//       where: {
+//         id: propertyId,
+//       },
+//       data: {
+//         views: {
+//           increment: 1,
+//         },
+//       },
+//     });
+
+//     // Return updated property
+//     return await tx.property.findUnique({
+//       where: {
+//         id: propertyId,
+//       },
+//       include: {
+//         author: {
+//           select: {
+//             id: true,
+//             name: true,
+//             email: true,
+//             role: true,
+//           },
+//         },
+//         reviews: true,
+//       },
+//     });
+//   });
+
+//   return transactionResult;
+// };
+
 const getPropertyById = async (propertyId: string) => {
   const transactionResult = await prisma.$transaction(async (tx) => {
     // Check property exists
@@ -123,7 +170,20 @@ const getPropertyById = async (propertyId: string) => {
             role: true,
           },
         },
-        reviews: true,
+
+        reviews: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     });
   });
@@ -177,6 +237,7 @@ const updateProperty = async (
       id: propertyId,
     },
   });
+
   if (!property) {
     throw new Error("Property not found");
   }
@@ -195,23 +256,78 @@ const updateProperty = async (
     }),
   };
 
-  return await prisma.property.update({
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+  const result = await prisma.$transaction(async (tx) => {
+    const updatedProperty = await tx.property.update({
+      where: {
+        id: propertyId,
       },
-      reviews: true,
-    },
-    where: {
-      id: propertyId,
-    },
-    data: updateData,
+      data: updateData,
+    });
+
+    // Property AVAILABLE হলে RentalRequest COMPLETED হবে
+    if (payload.status?.toUpperCase() === "AVAILABLE") {
+      await tx.rentalRequest.updateMany({
+        where: {
+          propertyId: propertyId,
+          rentalstatus: "ACTIVE",
+        },
+        data: {
+          rentalstatus: "COMPLETED",
+        },
+      });
+    }
+
+    return updatedProperty;
   });
+
+  return result;
 };
+
+// const updateProperty = async (
+//   propertyId: string,
+//   payload: propertyUpdatePayload,
+//   authorId: string,
+// ) => {
+//   const property = await prisma.property.findUnique({
+//     where: {
+//       id: propertyId,
+//     },
+//   });
+//   if (!property) {
+//     throw new Error("Property not found");
+//   }
+
+//   if (property.authorId !== authorId) {
+//     throw new Error("You are not authorized to update this property");
+//   }
+
+//   const updateData = {
+//     ...payload,
+//     ...(payload.category && {
+//       category: payload.category.toUpperCase() as PropertyCategory,
+//     }),
+//     ...(payload.status && {
+//       status: payload.status.toUpperCase() as PropertyStatus,
+//     }),
+//   };
+
+//   return await prisma.property.update({
+//     include: {
+//       author: {
+//         select: {
+//           id: true,
+//           name: true,
+//           email: true,
+//         },
+//       },
+//       reviews: true,
+//     },
+//     where: {
+//       id: propertyId,
+//     },
+//     data: updateData,
+//   });
+// };
 
 // update rental request
 const updateRentalRequestStatus = async (

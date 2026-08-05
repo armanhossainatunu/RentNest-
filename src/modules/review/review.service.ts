@@ -48,7 +48,11 @@ const createReview = async ({
   });
 
   if (existingReview) {
-    throw new Error("You have already reviewed this property.");
+    const error: any = new Error("You have already reviewed this property.");
+
+    error.statusCode = 409;
+
+    throw error;
   }
 
   // Create review

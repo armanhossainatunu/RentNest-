@@ -1,12 +1,13 @@
 import { Role } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { paymentService } from "../Payments/payment.service";
-
+// create rental request
 const createRentalRequest = async (
   tenantId: string,
   propertyId: string,
   message?: string,
 ) => {
+  // Check property
   const property = await prisma.property.findUnique({
     where: {
       id: propertyId,
@@ -17,33 +18,61 @@ const createRentalRequest = async (
     throw new Error("Property not found");
   }
 
+  // Check property availability
+  if (property.status === "UNAVAILABLE") {
+    throw new Error("This property is currently unavailable");
+  }
+
+  // Check previous active request
   const existingRequest = await prisma.rentalRequest.findFirst({
     where: {
       tenantId,
       propertyId,
+      rentalstatus: {
+        in: ["PENDING", "APPROVED", "ACTIVE"],
+      },
     },
   });
 
   if (existingRequest) {
-    throw new Error("Rental request already submitted");
+    throw new Error(
+      "You already have an active rental request for this property",
+    );
   }
 
-  const data = await prisma.rentalRequest.create({
+  // Create new rental request
+  const rentalRequest = await prisma.rentalRequest.create({
     data: {
       tenantId,
       propertyId,
       message,
+      rentalstatus: "PENDING",
     },
+
     include: {
-      property: true,
+      property: {
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     },
   });
-  // const payment = paymentService.initializePayment(request.property, tenantId as any);
 
-  return {
-    ...data,
-    payment: null,
-  };
+  return rentalRequest;
 };
 // get my rental requests
 const getMyRentalRequests = async (tenantId: string) => {
@@ -71,7 +100,7 @@ const getMyRentalRequests = async (tenantId: string) => {
           amount: true,
           status: true,
           transactionId: true,
-          createdAt : true
+          createdAt: true,
         },
       },
     },
@@ -143,7 +172,7 @@ const getRentalRequestDetails = async (
 const getAllRentalRequests = async () => {
   return prisma.rentalRequest.findMany({
     include: {
-        payment: {
+      payment: {
         select: {
           id: true,
           amount: true,
@@ -162,7 +191,6 @@ const getAllRentalRequests = async () => {
           },
         },
       },
-    
     },
     orderBy: {
       createdAt: "desc",

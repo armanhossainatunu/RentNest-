@@ -109,29 +109,6 @@ const updateProperty = catchAsync(
   },
 );
 // update rental request
-// const updateRentalRequestStatus = catchAsync(async (req : Request, res: Response, next: NextFunction) => {
-//   const rentalRequestId = req.params.id;
-//   const landlordId = req.user?.userId;
-
-//   const status = req.body?.status?.toUpperCase();
-
-//   if (!status) {
-//     throw new Error( "Status is required");
-//   }
-
-//   const result = await propertyService.updateRentalRequestStatus(
-//     rentalRequestId as string,
-//     landlordId as string,
-//     status
-//   );
-
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: 200,
-//     message: `Rental request ${status.toLowerCase()} successfully`,
-//     data: result,
-//   });
-// });
 const updateRentalRequestStatus = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rentalRequestId = req.params.id;

@@ -51,6 +51,7 @@ const registerIntoDB = async (payload: registerPayload) => {
   });
   return user;
 };
+// get all users
 const getAllUsers = async () => {
   const users = await prisma.user.findMany({
     include: {
